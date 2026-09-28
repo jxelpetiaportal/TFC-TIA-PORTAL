@@ -11,7 +11,9 @@ llenado con caudalímetro, taponadora TAP-01, rechazo de botellas malas y clasif
 | Carpeta | Qué hay |
 |---|---|
 | `docs/01_Tabla_Variables.html` | Tabla de variables completa: E/S, analógicas, DBs, FIFO, temporizadores, alarmas por fase y esquema de la línea. Se abre con cualquier navegador. |
+| `docs/02_Guia_Parte1.html` | Guía paso a paso, parte 1: proyecto, hardware, variables, UDT/DB, OB30, OB100 y FC1 en KOP. |
 | `tia/Variables_PLC.xlsx` | Variables PLC para importar en TIA Portal (Variables PLC → Importar). |
+| `tia/fuentes/` | Fuentes externas del UDT y los DB (Fuentes externas → Generar bloques a partir de la fuente). |
 | `herramientas/` | Script que genera los dos ficheros anteriores desde `datos_variables.py`. |
 
 Para regenerar después de cambiar una variable:
@@ -19,12 +21,13 @@ Para regenerar después de cambiar una variable:
 ```
 pip install openpyxl
 python3 herramientas/generar.py
+python3 herramientas/guia_parte1.py
 ```
 
 ## Estado
 
-1. ✅ Tabla de variables (Rev. A), pendiente de validar
-2. ⏳ DBs y UDT
-3. ⏳ Bloques KOP, uno por uno: FC1 … FC10
+1. ✅ Tabla de variables (Rev. B, decisiones confirmadas)
+2. ✅ DBs y UDT (fuentes externas)
+3. 🔄 Bloques KOP, uno por uno: OB30, OB100 y FC1 hechos (guía parte 1); siguiente FC2
 4. ⏳ Escena de Factory I/O
 5. ⏳ Pantalla HMI

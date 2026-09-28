@@ -1,0 +1,83 @@
+DATA_BLOCK "DB_Linea"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+NON_RETAIN
+   VAR 
+      Modo : Struct
+         Auto : Bool := FALSE;   // Selector en AUTO.
+         Ciclo_Marcha : Bool := FALSE;   // Ciclo automatico en marcha: se generan botellas.
+         Fin_Ciclo : Bool := FALSE;   // Se pulso PARO. No se generan mas botellas; las de la linea terminan.
+         Linea_Vacia : Bool := TRUE;   // No queda ninguna botella en la linea (FIFO vacio).
+         Rearme_Pendiente : Bool := TRUE;   // Hubo una emergencia y falta pulsar REARME. Arranca a 1 tras encender la CPU.
+         Parada_Seguridad : Bool := TRUE;   // Resumen: hay alguna emergencia activa o memorizada. Para todo y cierra la valvula de seguridad.
+      END_STRUCT;
+      Emergencia : Struct
+         Seta : Bool := FALSE;   // Seta pulsada.
+         Nivel_99 : Bool := FALSE;   // Tanque al 99 %.
+         Tiempo_40s : Bool := FALSE;   // Una botella lleva mas de 40 s en la linea.
+         Manual : Bool := FALSE;   // Selector en MANUAL.
+         Fallo_Equipo : Bool := FALSE;   // Alguna fase tiene lampara roja (fallo de cilindro, sensor, etc.).
+      END_STRUCT;
+      Tanque : Struct
+         Nivel_Pct : Real := 0.0;   // Nivel del tanque en % (desde IW64).
+         Nivel_25 : Bool := FALSE;   // Sensor 25 % usado por el programa. Viene de I3.3 o, en simulacion, de Nivel_Pct >= 25.
+         Nivel_90 : Bool := FALSE;   // Sensor 90 % usado por el programa (I3.4 o Nivel_Pct >= 90).
+         Nivel_99 : Bool := FALSE;   // Sensor 99 % usado por el programa (I3.5 o Nivel_Pct >= 99).
+         Bomba_Marcha : Bool := FALSE;   // Bomba pedida: SET por debajo del 25 %, RESET al 90 % o con emergencia.
+         Aviso_Nivel_Bajo : Bool := FALSE;   // Nivel por debajo del 25 %: el llenado de botellas espera (naranja).
+      END_STRUCT;
+      Llenado : Struct
+         Caudal_Lmin : Real := 0.0;   // Caudal instantaneo en l/min (desde IW66).
+         Volumen_L : Real := 0.0;   // Litros que han entrado en la botella actual.
+         Consigna_L : Real := 0.0;   // Litros a alcanzar: 90 % de 0,5 L = 0,45 L - 90 % de 2 L = 1,8 L.
+         En_Curso : Bool := FALSE;   // Valvula de llenado abierta, sumando litros.
+         Malas_Seguidas : Int := 0;   // Botellas malas consecutivas. 3 seguidas = rojo A303.
+      END_STRUCT;
+      Generador : Struct
+         Peticion : Bool := FALSE;   // Se cumplen las condiciones para pedir una botella nueva.
+      END_STRUCT;
+      Cajas : Struct
+         Cnt_Malas : Int := 0;   // Botellas en la caja de malas (0...20).
+         Cnt_05L : Int := 0;   // Botellas en la caja de 0,5 L (0...6).
+         Cnt_2L : Int := 0;   // Botellas en la caja de 2 L (0...6).
+         Cambiando_Malas : Bool := FALSE;   // Cambio de caja de malas en curso (naranja).
+         Cambiando_05L : Bool := FALSE;   // Cambio de caja de 0,5 L en curso (naranja).
+         Cambiando_2L : Bool := FALSE;   // Cambio de caja de 2 L en curso (naranja).
+      END_STRUCT;
+      Reloj : Struct
+         Base_100ms : DInt := 0;   // Se suma 1 cada 100 ms en el OB30. Sirve para medir el tiempo de cada botella (40 s = 400).
+      END_STRUCT;
+   END_VAR
+   VAR RETAIN
+      Produccion : Struct
+         Total_Buenas_05L : DInt := 0;   // Contador historico de botellas buenas de 0,5 L.
+         Total_Buenas_2L : DInt := 0;   // Contador historico de botellas buenas de 2 L.
+         Total_Malas : DInt := 0;   // Contador historico de botellas malas.
+         Total_Cajas_05L : DInt := 0;   // Cajas de 0,5 L completadas.
+         Total_Cajas_2L : DInt := 0;   // Cajas de 2 L completadas.
+         Total_Cajas_Malas : DInt := 0;   // Cajas de malas completadas.
+      END_STRUCT;
+      Param : Struct
+         Simulacion_FIO : Bool := TRUE;   // TRUE = niveles desde el nivel analogico (Factory I/O). FALSE = sensores reales I3.3-I3.5.
+         Max_Botellas : Int := 3;   // Botellas a la vez en la linea (1 a 4).
+         T_Espera_Emision : Time := T#8s;   // Tiempo minimo entre dos botellas nuevas.
+         Limite_Botella_100ms : DInt := 400;   // Tiempo maximo de una botella en la linea: 400 x 100 ms = 40 s.
+         Pct_Llenado : Real := 90.0;   // Porcentaje de llenado objetivo.
+         Vol_Botella_05 : Real := 0.5;   // Capacidad botella pequena (L).
+         Vol_Botella_2 : Real := 2.0;   // Capacidad botella grande (L).
+         Caudal_Max_Lmin : Real := 10.0;   // Caudal que corresponde a 27648 en IW66. A calibrar con Factory I/O.
+         Apertura_Llenado : Int := 13824;   // Apertura de la valvula de llenado: 13824 = 50 %.
+         T_Max_Llenado_05 : Time := T#6s;   // Si en este tiempo no se llega a 0,45 L, la botella es MALA.
+         T_Max_Llenado_2 : Time := T#10s;   // Si en este tiempo no se llega a 1,8 L, la botella es MALA.
+         T_Taponado : Time := T#2s;   // Tiempo con el cabezal de TAP-01 abajo (apriete del tapon).
+         T_Max_Cilindro : Time := T#3s;   // Tiempo maximo de movimiento de TAP-01 y del empujador. Si se pasa: rojo.
+         T_Cambio_Caja : Time := T#3s;   // Duracion del cambio de caja (retirar + poner nueva).
+         Cap_Caja_Buenas : Int := 6;   // Botellas por caja de buenas.
+         Cap_Caja_Malas : Int := 20;   // Botellas por caja de malas.
+         T_Max_Relleno_Tanque : Time := T#120s;   // Bomba en marcha mas de este tiempo sin llegar al 90 %: aviso naranja.
+      END_STRUCT;
+   END_VAR
+
+BEGIN
+
+END_DATA_BLOCK

@@ -1,0 +1,28 @@
+DATA_BLOCK "DB_Tiempos"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+NON_RETAIN
+   VAR 
+      T_Emision_Pulso : TP_TIME;   // Generador: Ancho del pulso al emisor de botellas.
+      T_Espera_Emision : TON_TIME;   // Generador: Espera entre botellas nuevas.
+      T_Llega_Deteccion : TON_TIME;   // Generador: Botella emitida que no llega a los sensores de altura: rojo A202.
+      T_Incoherencia_Alto : TON_TIME;   // Deteccion: Filtro para la alarma ALTO sin BAJO (A201).
+      T_Max_Llenado : TON_TIME;   // Llenado: Tiempo maximo de llenado segun el tipo de botella.
+      T_TAP01_Apriete : TON_TIME;   // Taponado: Tiempo con el cabezal abajo.
+      T_TAP01_Superv : TON_TIME;   // Taponado: Supervision de bajada o subida del cabezal.
+      T_Empujador_Superv : TON_TIME;   // Rechazo: Supervision de avance o retroceso del empujador.
+      T_Caida_Malas : TON_TIME;   // Rechazo: La botella empujada no llega a la caja de malas: rojo.
+      T_Transversal : TON_TIME;   // Clasificacion: La botella en C5 no llega a su caja: rojo.
+      T_Cambio_Malas : TON_TIME;   // Cajas: Secuencia de cambio de la caja de malas.
+      T_Cambio_05L : TON_TIME;   // Cajas: Secuencia de cambio de la caja de 0,5 L.
+      T_Cambio_2L : TON_TIME;   // Cajas: Secuencia de cambio de la caja de 2 L.
+      T_Relleno_Tanque : TON_TIME;   // Tanque: Bomba en marcha sin llegar al 90 %: naranja A104.
+      T_Incoherencia_Nivel : TON_TIME;   // Tanque: Filtro para la alarma de sensores de nivel incoherentes (A103).
+      C_Caja_Malas : CTU_INT;   // Cajas: Cuenta botellas en la caja de malas. Q = caja llena.
+      C_Caja_05L : CTU_INT;   // Cajas: Cuenta botellas en la caja de 0,5 L.
+      C_Caja_2L : CTU_INT;   // Cajas: Cuenta botellas en la caja de 2 L.
+   END_VAR
+
+BEGIN
+
+END_DATA_BLOCK

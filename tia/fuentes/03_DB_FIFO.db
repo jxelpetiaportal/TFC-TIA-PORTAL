@@ -1,0 +1,18 @@
+DATA_BLOCK "DB_FIFO"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+NON_RETAIN
+   VAR 
+      Botella : Array[0..3] of "UDT_Botella";   // 4 posiciones = maximo 4 botellas a la vez. Se usa en circulo: despues de la 3 vuelve a la 0.
+      Ptr_Entrada : Int := 0;   // Posicion donde se guarda la proxima botella que sale del generador.
+      Ptr_Deteccion : Int := 0;   // Proxima botella que llegara a los sensores de altura.
+      Ptr_Llenado : Int := 0;   // Proxima botella que llegara a la estacion de llenado.
+      Ptr_Rechazo : Int := 0;   // Proxima botella que llegara al empujador.
+      Idx_Transversal : Int := 0;   // Botella que esta ahora en la cinta C5 (solo cabe una).
+      N_Botellas : Int := 0;   // Botellas que hay ahora en la linea.
+      Siguiente_ID : Int := 1;   // Numero que llevara la proxima botella.
+   END_VAR
+
+BEGIN
+
+END_DATA_BLOCK

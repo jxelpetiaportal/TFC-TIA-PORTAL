@@ -1,0 +1,14 @@
+TYPE "UDT_Botella"
+VERSION : 0.1
+   STRUCT
+      Activa : Bool := FALSE;   // Esta posicion del FIFO tiene una botella en la linea.
+      ID : Int := 0;   // Numero correlativo de la botella (1, 2, 3...).
+      Tipo_Leido : Bool := FALSE;   // La botella ya paso por los sensores de altura.
+      Es_2L : Bool := FALSE;   // 0 = botella de 0,5 L - 1 = botella de 2 L.
+      Llenada : Bool := FALSE;   // Ya paso por la estacion de llenado.
+      Mala : Bool := FALSE;   // Se lleno por debajo del 90 %: ira a la caja de malas.
+      Volumen_L : Real := 0.0;   // Litros medidos al terminar el llenado.
+      T_Emision : DInt := 0;   // Valor de Reloj.Base_100ms cuando salio del generador.
+   END_STRUCT;
+
+END_TYPE

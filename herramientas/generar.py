@@ -52,6 +52,67 @@ def generar_excel(ruta):
 
 
 # ---------------------------------------------------------------------------
+# Fuentes externas para TIA (UDT y DB). Comentarios sin tildes: TIA V15 lee
+# las fuentes externas mejor en ASCII.
+# ---------------------------------------------------------------------------
+def ascii_(t):
+    import unicodedata
+    t = t.replace("–", "-").replace("·", "-").replace("→", "->").replace("…", "...").replace("≥", ">=").replace("×", "x").replace("−", "-")
+    return unicodedata.normalize("NFKD", t).encode("ascii", "ignore").decode()
+
+
+def _var(nombre, tipo, inicial, coment, sangria):
+    ini = "" if inicial in ("", "—") else f" := {inicial}"
+    return f"{sangria}{nombre} : {tipo}{ini};   // {ascii_(coment)}\n"
+
+
+def generar_fuentes(carpeta):
+    os.makedirs(carpeta, exist_ok=True)
+    fuentes = {}
+
+    txt = 'TYPE "UDT_Botella"\nVERSION : 0.1\n   STRUCT\n'
+    for n, t, v, x in D.UDT_BOTELLA:
+        txt += _var(n, t, v, x, "      ")
+    txt += "   END_STRUCT;\n\nEND_TYPE\n"
+    fuentes["01_UDT_Botella.udt"] = txt
+
+    def seccion_structs(filas):
+        out, grupo = "", None
+        for g, n, t, v, _r, x in filas:
+            if g != grupo:
+                if grupo:
+                    out += "      END_STRUCT;\n"
+                out += f"      {g} : Struct\n"
+                grupo = g
+            out += _var(n, t, v, x, "         ")
+        return out + "      END_STRUCT;\n"
+
+    no_rem = [f for f in D.DB_LINEA if not f[4]]
+    rem = [f for f in D.DB_LINEA if f[4]]
+    txt = ('DATA_BLOCK "DB_Linea"\n{ S7_Optimized_Access := \'TRUE\' }\nVERSION : 0.1\nNON_RETAIN\n'
+           "   VAR \n" + seccion_structs(no_rem) + "   END_VAR\n"
+           "   VAR RETAIN\n" + seccion_structs(rem) + "   END_VAR\n\nBEGIN\n\nEND_DATA_BLOCK\n")
+    fuentes["02_DB_Linea.db"] = txt
+
+    txt = 'DATA_BLOCK "DB_FIFO"\n{ S7_Optimized_Access := \'TRUE\' }\nVERSION : 0.1\nNON_RETAIN\n   VAR \n'
+    for n, t, v, x in D.DB_FIFO:
+        txt += _var(n, t, v, x, "      ")
+    txt += "   END_VAR\n\nBEGIN\n\nEND_DATA_BLOCK\n"
+    fuentes["03_DB_FIFO.db"] = txt
+
+    txt = 'DATA_BLOCK "DB_Tiempos"\n{ S7_Optimized_Access := \'TRUE\' }\nVERSION : 0.1\nNON_RETAIN\n   VAR \n'
+    for n, t, _p, f, x in D.TEMPORIZADORES:
+        txt += _var(n, t, "", f"{f}: {x}", "      ")
+    txt += "   END_VAR\n\nBEGIN\n\nEND_DATA_BLOCK\n"
+    fuentes["04_DB_Tiempos.db"] = txt
+
+    for nombre, contenido in fuentes.items():
+        with open(os.path.join(carpeta, nombre), "w", encoding="ascii", newline="\r\n") as fh:
+            fh.write(contenido)
+    return list(fuentes)
+
+
+# ---------------------------------------------------------------------------
 # HTML
 # ---------------------------------------------------------------------------
 def addr_chip(a):
@@ -275,8 +336,8 @@ def construir_html():
                     [f"<tr><td class='mono'><b>{e(b)}</b></td><td class='nm'>{e(n)}</td><td>{e(x)}</td></tr>"
                      for b, n, x in D.BLOQUES])
 
-    pend = "<ol class='pend'>" + "".join(
-        f"<li><b>{e(t)}</b><p>{e(x)}</p></li>" for t, x in D.PENDIENTES) + "</ol>"
+    pend = "<ol class='pend ok'>" + "".join(
+        f"<li><b>{e(t)}</b><p>{e(x)}</p></li>" for t, x in D.DECISIONES) + "</ol>"
 
     n_di = sum(1 for x in D.ENTRADAS_DIGITALES if x[1])
     n_dq = len(D.SALIDAS_DIGITALES)
@@ -284,7 +345,7 @@ def construir_html():
     nav = [("hw", "Hardware"), ("esquema", "Esquema"), ("di", "Entradas"), ("dq", "Salidas"),
            ("lamparas", "Lámparas"), ("an", "Analógicas"), ("marcas", "Marcas"), ("db", "DB_Linea"),
            ("fifo", "FIFO"), ("tiempos", "Tiempos"), ("alarmas", "Alarmas"), ("bloques", "Bloques"),
-           ("pendiente", "Pendiente")]
+           ("decisiones", "Decisiones")]
     nav_html = "".join(f"<a href='#{i}'>{t}</a>" for i, t in nav)
 
     cuerpo = "".join([
@@ -311,13 +372,16 @@ def construir_html():
         seccion("alarmas", "Alarmas por fase", "Cada fase tiene lámpara verde, naranja y roja.",
                 leyenda + "<h3>Significado del verde</h3>" + ver + "<h3>Lista de alarmas</h3>" + al),
         seccion("bloques", "Estructura de bloques", "Orden de llamada dentro del OB1: de FC1 a FC10.", bloques),
-        seccion("pendiente", "Pendiente de confirmar",
-                "Con esto contestado paso a programar bloque por bloque.", pend),
+        seccion("decisiones", "Decisiones confirmadas",
+                "Acordadas contigo antes de empezar a programar.", pend),
     ])
 
     with open(os.path.join(os.path.dirname(__file__), "plantilla.html"), encoding="utf-8") as fh:
         plantilla = fh.read()
+    with open(os.path.join(os.path.dirname(__file__), "estilo.css"), encoding="utf-8") as fh:
+        css = fh.read()
     return (plantilla
+            .replace("{{CSS}}", css)
             .replace("{{NAV}}", nav_html)
             .replace("{{CUERPO}}", cuerpo)
             .replace("{{REV}}", e(D.REVISION))
@@ -340,6 +404,7 @@ if __name__ == "__main__":
         with open(sys.argv[1], "w", encoding="utf-8") as fh:
             fh.write(pagina)
         print("Web   ->", sys.argv[1])
+    print("Fuentes ->", generar_fuentes(os.path.join(RAIZ, "tia", "fuentes")))
     ruta_xlsx = os.path.join(RAIZ, "tia", "Variables_PLC.xlsx")
     n = generar_excel(ruta_xlsx)
     print(f"Excel -> {ruta_xlsx} ({n} variables)")

@@ -10,7 +10,7 @@ Si cambias una variable, cámbiala aquí y vuelve a ejecutar:
     python3 herramientas/generar.py
 """
 
-REVISION = "Rev. A"
+REVISION = "Rev. B"
 FECHA = "28/09/2026"
 TABLA_TIA = "Linea_Llenado"   # nombre de la tabla de variables en TIA
 
@@ -69,7 +69,9 @@ ENTRADAS_DIGITALES = [
     ("%I0.6", "SW_Sim_Fallo_Llenado", "Bool", "Interruptor PRUEBAS: forzar botella mala",
      "Solo para pruebas. A 1, la válvula de llenado corta antes del 90 % y la botella sale MALA.",
      "Selector Switch"),
-    ("%I0.7", "", "", "Reserva", "Propuesta: interruptor de prueba del nivel 99 % (ver pendientes).", ""),
+    ("%I0.7", "SW_Prueba_Nivel_99", "Bool", "Interruptor PRUEBAS: bomba no para al 90 %",
+     "Solo para pruebas. A 1, la bomba sigue llenando por encima del 90 % para poder comprobar la emergencia del 99 %.",
+     "Selector Switch"),
     # --- Sensores en cinta
     ("%I1.0", "S_Botella_Bajo", "Bool", "Sensor altura BAJA (detecta cualquier botella)",
      "Estación de detección. Solo BAJO = botella de 0,5 L.",
@@ -270,7 +272,7 @@ MARCAS = [
     ("%M0.5", "Clock_1Hz", "Bool", "Marca de ciclo 1 Hz",
      "Parpadeo lento: lámparas verdes en espera, piloto de rearme y piloto de paro."),
     ("%M1.0", "FirstScan", "Bool", "Primer ciclo tras arrancar la CPU",
-     "Inicializa FIFO y contadores de caja y deja el rearme pendiente."),
+     "Disponible si hace falta. La inicialización la hace el OB100."),
     ("%M1.2", "AlwaysTRUE", "Bool", "Siempre 1", "Para segmentos que deben ejecutarse siempre."),
     ("%M1.3", "AlwaysFALSE", "Bool", "Siempre 0", ""),
 ]
@@ -305,7 +307,7 @@ DB_LINEA = [
     ("Llenado", "Volumen_L", "Real", "0.0", "", "Litros que han entrado en la botella actual."),
     ("Llenado", "Consigna_L", "Real", "0.0", "", "Litros a alcanzar: 90 % de 0,5 L = 0,45 L · 90 % de 2 L = 1,8 L."),
     ("Llenado", "En_Curso", "Bool", "FALSE", "", "Válvula de llenado abierta, sumando litros."),
-    ("Llenado", "Malas_Seguidas", "Int", "0", "", "Botellas malas consecutivas (propuesta: 3 seguidas = rojo)."),
+    ("Llenado", "Malas_Seguidas", "Int", "0", "", "Botellas malas consecutivas. 3 seguidas = rojo A303."),
     # Generador
     ("Generador", "Peticion", "Bool", "FALSE", "", "Se cumplen las condiciones para pedir una botella nueva."),
     # Contadores de caja
@@ -315,6 +317,8 @@ DB_LINEA = [
     ("Cajas", "Cambiando_Malas", "Bool", "FALSE", "", "Cambio de caja de malas en curso (naranja)."),
     ("Cajas", "Cambiando_05L", "Bool", "FALSE", "", "Cambio de caja de 0,5 L en curso (naranja)."),
     ("Cajas", "Cambiando_2L", "Bool", "FALSE", "", "Cambio de caja de 2 L en curso (naranja)."),
+    # Reloj
+    ("Reloj", "Base_100ms", "DInt", "0", "", "Se suma 1 cada 100 ms en el OB30. Sirve para medir el tiempo de cada botella (40 s = 400)."),
     # Producción (remanente: se conserva al apagar)
     ("Produccion", "Total_Buenas_05L", "DInt", "0", "Sí", "Contador histórico de botellas buenas de 0,5 L."),
     ("Produccion", "Total_Buenas_2L", "DInt", "0", "Sí", "Contador histórico de botellas buenas de 2 L."),
@@ -322,8 +326,6 @@ DB_LINEA = [
     ("Produccion", "Total_Cajas_05L", "DInt", "0", "Sí", "Cajas de 0,5 L completadas."),
     ("Produccion", "Total_Cajas_2L", "DInt", "0", "Sí", "Cajas de 2 L completadas."),
     ("Produccion", "Total_Cajas_Malas", "DInt", "0", "Sí", "Cajas de malas completadas."),
-    # Reloj
-    ("Reloj", "Base_100ms", "DInt", "0", "", "Se suma 1 cada 100 ms en el OB30. Sirve para medir el tiempo de cada botella (40 s = 400)."),
     # Parámetros (remanentes)
     ("Param", "Simulacion_FIO", "Bool", "TRUE", "Sí", "TRUE = niveles desde el nivel analógico (Factory I/O). FALSE = sensores reales I3.3–I3.5."),
     ("Param", "Max_Botellas", "Int", "3", "Sí", "Botellas a la vez en la línea (1 a 4)."),
@@ -417,7 +419,7 @@ ALARMAS = [
     ("A302", "3", "N", "Llenado esperando nivel del tanque",
      "Botella en posición y Nivel_25 = 0", "La botella espera en C2.", "Sola, al superar el 25 %."),
     ("A303", "3", "R", "3 botellas malas seguidas",
-     "Malas_Seguidas ≥ 3", "Emergencia general: posible fallo de válvula o caudalímetro.", "REARME (propuesta)."),
+     "Malas_Seguidas ≥ 3", "Emergencia general: posible fallo de válvula o caudalímetro.", "REARME."),
     ("A401", "4", "R", "TAP-01: el cabezal no baja",
      "TAP01_Bajar = 1 y no llega S_TAP01_Abajo en 3 s", "Emergencia general (fallo de equipo).", "REARME."),
     ("A402", "4", "R", "TAP-01: el cabezal no sube",
@@ -486,37 +488,28 @@ BLOQUES = [
 ]
 
 # ---------------------------------------------------------------------------
-# Pendiente de confirmar
+# Decisiones confirmadas (antes "pendiente de confirmar")
 # ---------------------------------------------------------------------------
-PENDIENTES = [
+DECISIONES = [
     ("Tanque en Factory I/O",
-     "Factory I/O no tiene sensores de nivel todo/nada en el tanque, solo un medidor analógico. "
-     "Propuesta: el programa usa DB_Linea.Tanque.Nivel_25/90/99; en simulación salen del nivel analógico "
-     "(≥ 25, ≥ 90, ≥ 99 %) y en una instalación real de I3.3–I3.5. Se elige con Param.Simulacion_FIO."),
+     "Los sensores de 25/90/99 % se calculan desde el nivel analógico IW64 (Param.Simulacion_FIO = TRUE). "
+     "Las entradas I3.3–I3.5 quedan preparadas para una instalación real."),
     ("Botellas en Factory I/O",
-     "Factory I/O no tiene botellas. Propuesta: caja pequeña = 0,5 L y caja grande = 2 L, "
-     "con los dos sensores de altura colocados de forma que la pequeña solo tape el BAJO."),
-    ("Taponadora TAP-01 en Factory I/O",
-     "No hay taponadora como tal. Propuesta: usar el Pick & Place de 2 ejes moviendo solo el eje Z como cabezal. "
-     "Si no da finales de carrera arriba/abajo, se supervisa por tiempo."),
+     "Caja pequeña = botella de 0,5 L. Caja grande = botella de 2 L."),
+    ("Taponadora TAP-01",
+     "Pick & Place de 2 ejes moviendo solo el eje Z como cabezal. Si no da finales de carrera, se supervisa por tiempo."),
     ("Cinta transversal C5",
-     "Propuesta: cinta que gira en los dos sentidos (Q1.0 / Q1.1). "
-     "Cuando montemos la escena confirmamos qué pieza de Factory I/O lo permite."),
+     "Una cinta que gira en los dos sentidos: Q1.0 hacia 0,5 L y Q1.1 hacia 2 L."),
     ("Lámpara roja = emergencia general",
-     "Propuesta: cualquier fallo rojo de una fase para la línea y cierra la válvula de seguridad, igual que la seta."),
+     "Cualquier fallo rojo para la línea y cierra la válvula de seguridad."),
     ("Baliza y sirena",
-     "Propuesta: se activan en todas las emergencias (99 %, seta, 40 s, fallos rojos). "
-     "Al pasar a MANUAL no suena la sirena, solo se enciende la naranja de la fase 7."),
+     "En todas las emergencias. En MANUAL no suena la sirena: solo se enciende la naranja de la fase 7."),
     ("Prueba del 99 %",
-     "Como la bomba para al 90 %, el 99 % no se alcanza solo. "
-     "Propuesta: interruptor de pruebas en I0.7 que deja la bomba en marcha para poder probarlo."),
+     "Interruptor de pruebas SW_Prueba_Nivel_99 en I0.7: la bomba no para al 90 %."),
     ("3 botellas malas seguidas",
-     "Propuesta: alarma roja A303, porque suele indicar una válvula o un caudalímetro averiado."),
+     "Alarma roja A303 (emergencia general)."),
     ("Modo MANUAL",
-     "Recomendación: la línea para y la válvula queda cerrada. Los movimientos manuales "
-     "(cintas, TAP-01, empujador y cambio de cajas) se hacen desde la pantalla HMI con enclavamientos. "
-     "No hacen falta más pulsadores ni entradas."),
-    ("Direcciones y módulos",
-     "¿Te vale esta configuración de hardware (CPU 1214C + DI16 + 2×DQ16 + AQ2)? "
-     "Las salidas digitales quedan completas; si necesitas más, añadimos un módulo."),
+     "La línea se para y la válvula queda cerrada. Los movimientos manuales se harán desde la HMI, con enclavamientos."),
+    ("Hardware",
+     "CPU 1214C + SM1221 DI16 + 2× SM1222 DQ16 + SM1232 AQ2, con las direcciones de esta tabla."),
 ]
