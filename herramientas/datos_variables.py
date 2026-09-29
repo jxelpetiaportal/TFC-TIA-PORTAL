@@ -10,7 +10,7 @@ Si cambias una variable, cámbiala aquí y vuelve a ejecutar:
     python3 herramientas/generar.py
 """
 
-REVISION = "Rev. B"
+REVISION = "Rev. C"
 FECHA = "28/09/2026"
 TABLA_TIA = "Linea_Llenado"   # nombre de la tabla de variables en TIA
 
@@ -162,10 +162,10 @@ SALIDAS_DIGITALES = [
      "Se cierra con CUALQUIER emergencia y al pasar a MANUAL.",
      "Sin pieza: bloquea la salida de la bomba QW64"),
     ("%Q0.1", "Baliza_Naranja", "Bool", "Baliza naranja de emergencia (intermitente)",
-     "Parpadea a 2 Hz mientras hay una emergencia.",
+     "Parpadea a 2 Hz desde que aparece una emergencia hasta que se completa el rearme. No se enciende por pasar a MANUAL.",
      "Warning Light"),
     ("%Q0.2", "Sirena", "Bool", "Sirena de emergencia",
-     "Suena mientras hay una emergencia. Se silencia al pulsar REARME.",
+     "Suena desde que aparece una emergencia hasta pulsar REARME, aunque la causa siga activa. No suena por pasar a MANUAL.",
      "Alarm Siren"),
     ("%Q0.3", "Emisor_Botellas", "Bool", "Generador de botellas (pulso = 1 botella)",
      "Pulso corto que pide una botella nueva. El tipo (0,5 L o 2 L) sale aleatorio.",
@@ -287,14 +287,26 @@ DB_LINEA = [
     ("Modo", "Ciclo_Marcha", "Bool", "FALSE", "", "Ciclo automático en marcha: se generan botellas."),
     ("Modo", "Fin_Ciclo", "Bool", "FALSE", "", "Se pulsó PARO. No se generan más botellas; las de la línea terminan."),
     ("Modo", "Linea_Vacia", "Bool", "TRUE", "", "No queda ninguna botella en la línea (FIFO vacío)."),
-    ("Modo", "Rearme_Pendiente", "Bool", "TRUE", "", "Hubo una emergencia y falta pulsar REARME. Arranca a 1 tras encender la CPU."),
+    ("Modo", "Rearme_Pendiente", "Bool", "TRUE", "", "Se activa con cualquier causa y solo se borra con REARME cuando ya no queda ninguna. Arranca a 1 al encender la CPU."),
     ("Modo", "Parada_Seguridad", "Bool", "TRUE", "", "Resumen: hay alguna emergencia activa o memorizada. Para todo y cierra la válvula de seguridad."),
     # Emergencias (memorizadas hasta REARME)
-    ("Emergencia", "Seta", "Bool", "FALSE", "", "Seta pulsada."),
-    ("Emergencia", "Nivel_99", "Bool", "FALSE", "", "Tanque al 99 %."),
-    ("Emergencia", "Tiempo_40s", "Bool", "FALSE", "", "Una botella lleva más de 40 s en la línea."),
-    ("Emergencia", "Manual", "Bool", "FALSE", "", "Selector en MANUAL."),
-    ("Emergencia", "Fallo_Equipo", "Bool", "FALSE", "", "Alguna fase tiene lámpara roja (fallo de cilindro, sensor, etc.)."),
+    ("Emergencia", "Seta", "Bool", "FALSE", "", "Causa activa ahora: seta pulsada."),
+    ("Emergencia", "Nivel_99", "Bool", "FALSE", "", "Causa activa ahora: tanque al 99 %."),
+    ("Emergencia", "Tiempo_40s", "Bool", "FALSE", "", "Causa activa ahora: alguna botella pasa de 40 s. La escribe FC9."),
+    ("Emergencia", "Manual", "Bool", "FALSE", "", "Causa activa ahora: selector en MANUAL."),
+    ("Emergencia", "Fallo_Equipo", "Bool", "FALSE", "", "Causa activa ahora: alguna fase tiene un fallo rojo. La escribe FC10."),
+    ("Emergencia", "Hay_Causa", "Bool", "FALSE", "", "Resumen: alguna de las 5 causas está activa ahora."),
+    ("Emergencia", "Memo_Sirena", "Bool", "FALSE", "", "Sirena sonando: se activa al aparecer una emergencia y se silencia con REARME."),
+    ("Emergencia", "Memo_Baliza", "Bool", "FALSE", "", "Baliza parpadeando: desde que aparece una emergencia hasta que se completa el rearme."),
+    # Flancos (memorias de los contactos |P| y pulsos de un ciclo)
+    ("Flancos", "Marcha_FM", "Bool", "FALSE", "", "Memoria de flanco de PB_Marcha. No se usa para nada más."),
+    ("Flancos", "Rearme_FM", "Bool", "FALSE", "", "Memoria de flanco de PB_Rearme."),
+    ("Flancos", "Seta_FM", "Bool", "FALSE", "", "Memoria de flanco de Emergencia.Seta."),
+    ("Flancos", "Nivel99_FM", "Bool", "FALSE", "", "Memoria de flanco de Emergencia.Nivel_99."),
+    ("Flancos", "T40_FM", "Bool", "FALSE", "", "Memoria de flanco de Emergencia.Tiempo_40s."),
+    ("Flancos", "Fallo_FM", "Bool", "FALSE", "", "Memoria de flanco de Emergencia.Fallo_Equipo."),
+    ("Flancos", "Marcha_Pulso", "Bool", "FALSE", "", "Vale 1 durante un solo ciclo al pulsar MARCHA."),
+    ("Flancos", "Rearme_Pulso", "Bool", "FALSE", "", "Vale 1 durante un solo ciclo al pulsar REARME."),
     # Tanque
     ("Tanque", "Nivel_Pct", "Real", "0.0", "", "Nivel del tanque en % (desde IW64)."),
     ("Tanque", "Nivel_25", "Bool", "FALSE", "", "Sensor 25 % usado por el programa. Viene de I3.3 o, en simulación, de Nivel_Pct ≥ 25."),

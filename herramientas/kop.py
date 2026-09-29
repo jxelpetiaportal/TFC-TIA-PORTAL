@@ -35,8 +35,9 @@ def _elemento(arriba, centro, abajo=""):
     return _Bloque([arriba.center(w), centro, abajo.center(w)], 1)
 
 
-def contacto(op, sym="| |"):
-    return ("c", op, sym)
+def contacto(op, sym="| |", abajo=""):
+    """abajo: bit de memoria de flanco en los contactos |P| y |N|."""
+    return ("c", op, sym, abajo)
 
 
 def comparar(op1, cmp, op2, tipo):
@@ -47,14 +48,22 @@ def bobina(op, sym="( )"):
     return ("b", op, sym)
 
 
-def caja(nombre, tipo, entradas, salidas):
-    """entradas: [(operando, pin)], salidas: [(pin, operando)]"""
-    return ("caja", nombre, tipo, entradas, salidas)
+def caja(nombre, tipo, entradas, salidas, instancia="", pin_rung="EN", pin_sal="ENO", op_sal=""):
+    """entradas: [(operando, pin)], salidas: [(pin, operando)].
+    instancia: DB de instancia encima de la caja (TON, CTU...).
+    pin_rung / pin_sal / op_sal: pines de la fila por donde entra la corriente
+    (EN/ENO en las cajas normales, IN/Q en los temporizadores, CU/Q en los contadores)."""
+    return ("caja", nombre, tipo, entradas, salidas, instancia, pin_rung, pin_sal, op_sal)
+
+
+def ton(instancia, pt, q, tipo="Time"):
+    """Temporizador TON con su salida Q asignada directamente a una variable."""
+    return caja("TON", tipo, [(pt, "PT")], [("ET", "")], instancia, "IN", "Q", q)
 
 
 def _render_el(el):
     if el[0] == "c":
-        return _elemento(el[1], H * 2 + el[2] + H * 2)
+        return _elemento(el[1], H * 2 + el[2] + H * 2, el[3])
     if el[0] == "cmp":
         _, op1, cmp, op2, tipo = el
         return _elemento(op1, H * 2 + f"| {cmp} |" + H * 2, f"{op2}   [{tipo}]")
@@ -126,11 +135,11 @@ def _bobinas(lista):
 
 
 def _caja(el):
-    _, nombre, tipo, entradas, salidas = el
-    pins_in = ["EN"] + [p for _, p in entradas]
+    _, nombre, tipo, entradas, salidas, instancia, pin_rung, pin_sal, op_sal = el
+    pins_in = [pin_rung] + [p for _, p in entradas]
     ops_in = [""] + [o for o, _ in entradas]
-    pins_out = ["ENO"] + [p for p, _ in salidas]
-    ops_out = [""] + [o for _, o in salidas]
+    pins_out = [pin_sal] + [p for p, _ in salidas]
+    ops_out = [op_sal] + [o for _, o in salidas]
     n = max(len(pins_in), len(pins_out))
     pins_in += [""] * (n - len(pins_in))
     ops_in += [""] * (n - len(ops_in))
@@ -140,11 +149,14 @@ def _caja(el):
     wo = max(len(p) for p in pins_out)
     interior = max(len(nombre), len(tipo), wi + wo + 3) + 2
     wop = max(len(o) for o in ops_in) + 3
-    filas = [
+    filas = [" " * wop + "  " + instancia] if instancia else []
+    filas += [
         " " * wop + " ┌" + H * interior + "┐",
         " " * wop + " │" + nombre.center(interior) + "│",
-        " " * wop + " │" + tipo.center(interior) + "│",
     ]
+    if tipo:
+        filas.append(" " * wop + " │" + tipo.center(interior) + "│")
+    mid = len(filas)
     for i in range(n):
         if i == 0:
             izq = H * (wop + 1) + "┤"
@@ -159,7 +171,7 @@ def _caja(el):
             der = "│"
         filas.append(izq + centro + der)
     filas.append(" " * wop + " └" + H * interior + "┘")
-    return _Bloque(filas, 3)
+    return _Bloque(filas, mid)
 
 
 def _unir(a, b):

@@ -8,15 +8,28 @@ NON_RETAIN
          Ciclo_Marcha : Bool := FALSE;   // Ciclo automatico en marcha: se generan botellas.
          Fin_Ciclo : Bool := FALSE;   // Se pulso PARO. No se generan mas botellas; las de la linea terminan.
          Linea_Vacia : Bool := TRUE;   // No queda ninguna botella en la linea (FIFO vacio).
-         Rearme_Pendiente : Bool := TRUE;   // Hubo una emergencia y falta pulsar REARME. Arranca a 1 tras encender la CPU.
+         Rearme_Pendiente : Bool := TRUE;   // Se activa con cualquier causa y solo se borra con REARME cuando ya no queda ninguna. Arranca a 1 al encender la CPU.
          Parada_Seguridad : Bool := TRUE;   // Resumen: hay alguna emergencia activa o memorizada. Para todo y cierra la valvula de seguridad.
       END_STRUCT;
       Emergencia : Struct
-         Seta : Bool := FALSE;   // Seta pulsada.
-         Nivel_99 : Bool := FALSE;   // Tanque al 99 %.
-         Tiempo_40s : Bool := FALSE;   // Una botella lleva mas de 40 s en la linea.
-         Manual : Bool := FALSE;   // Selector en MANUAL.
-         Fallo_Equipo : Bool := FALSE;   // Alguna fase tiene lampara roja (fallo de cilindro, sensor, etc.).
+         Seta : Bool := FALSE;   // Causa activa ahora: seta pulsada.
+         Nivel_99 : Bool := FALSE;   // Causa activa ahora: tanque al 99 %.
+         Tiempo_40s : Bool := FALSE;   // Causa activa ahora: alguna botella pasa de 40 s. La escribe FC9.
+         Manual : Bool := FALSE;   // Causa activa ahora: selector en MANUAL.
+         Fallo_Equipo : Bool := FALSE;   // Causa activa ahora: alguna fase tiene un fallo rojo. La escribe FC10.
+         Hay_Causa : Bool := FALSE;   // Resumen: alguna de las 5 causas esta activa ahora.
+         Memo_Sirena : Bool := FALSE;   // Sirena sonando: se activa al aparecer una emergencia y se silencia con REARME.
+         Memo_Baliza : Bool := FALSE;   // Baliza parpadeando: desde que aparece una emergencia hasta que se completa el rearme.
+      END_STRUCT;
+      Flancos : Struct
+         Marcha_FM : Bool := FALSE;   // Memoria de flanco de PB_Marcha. No se usa para nada mas.
+         Rearme_FM : Bool := FALSE;   // Memoria de flanco de PB_Rearme.
+         Seta_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Seta.
+         Nivel99_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Nivel_99.
+         T40_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Tiempo_40s.
+         Fallo_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Fallo_Equipo.
+         Marcha_Pulso : Bool := FALSE;   // Vale 1 durante un solo ciclo al pulsar MARCHA.
+         Rearme_Pulso : Bool := FALSE;   // Vale 1 durante un solo ciclo al pulsar REARME.
       END_STRUCT;
       Tanque : Struct
          Nivel_Pct : Real := 0.0;   // Nivel del tanque en % (desde IW64).

@@ -3,7 +3,6 @@
 Guía paso a paso · Parte 1: proyecto, hardware, variables, datos y primeros bloques KOP.
 Genera docs/02_Guia_Parte1.html   (y, si se pasa una ruta, la versión para publicar).
 """
-import html
 import os
 import sys
 
@@ -11,74 +10,11 @@ sys.path.insert(0, os.path.dirname(__file__))
 import datos_variables as D  # noqa: E402
 from kop import bobina, caja, comparar, contacto, segmento  # noqa: E402
 
-RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-e = html.escape
+from guia_comun import (FIFO, LLE, NIV, PAR, Guia, e, escribir, fuente, interfaz,  # noqa: E402
+                        leer_fuente, lista, ojo, ruta, seg, tabla, tip)
 
-# ---------------------------------------------------------------------------
-# Piezas de maquetación
-# ---------------------------------------------------------------------------
-_pasos = []
-
-
-def paso(id_, titulo, cuerpo, parte):
-    _pasos.append((id_, titulo, parte))
-    n = len(_pasos)
-    return (f'<section class="paso" id="{id_}"><div class="pnum">{n}</div>'
-            f'<div class="pbody"><h3>{titulo}</h3>{cuerpo}</div></section>')
-
-
-def ruta(*partes):
-    return '<span class="ruta">' + ' <b>›</b> '.join(e(p) for p in partes) + '</span>'
-
-
-def tip(txt):
-    return f'<div class="tip"><b>Truco</b> {txt}</div>'
-
-
-def ojo(txt):
-    return f'<div class="ojo"><b>Ojo</b> {txt}</div>'
-
-
-def lista(*items, ordenada=True):
-    tag = "ol" if ordenada else "ul"
-    return f"<{tag} class='acc'>" + "".join(f"<li>{i}</li>" for i in items) + f"</{tag}>"
-
-
-def tabla(cab, filas):
-    th = "".join(f"<th>{c}</th>" for c in cab)
-    tr = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in f) + "</tr>" for f in filas)
-    return f'<div class="tw"><table class="vt"><thead><tr>{th}</tr></thead><tbody>{tr}</tbody></table></div>'
-
-
-def seg(num, titulo, dibujo, explicacion):
-    return (f'<figure class="seg"><figcaption><span>Segmento {num}</span> {e(titulo)}</figcaption>'
-            f'<div class="kopw"><pre class="kop">{e(dibujo)}</pre></div>'
-            f'<div class="segtxt">{explicacion}</div></figure>')
-
-
-def interfaz(filas):
-    return tabla(["Sección", "Nombre", "Tipo", "Para qué"],
-                 [(f"<span class='mono'>{a}</span>", f"<span class='nm'>{b}</span>",
-                   f"<span class='ty'>{c}</span>", d) for a, b, c, d in filas])
-
-
-def fuente(nombre, texto):
-    id_ = "src-" + nombre.split(".")[0]
-    return (f'<details class="src"><summary><span class="mono">{e(nombre)}</span>'
-            f'<button type="button" class="copiar" data-copiar="{id_}">Copiar</button></summary>'
-            f'<pre id="{id_}">{e(texto)}</pre></details>')
-
-
-def leer_fuente(nombre):
-    with open(os.path.join(RAIZ, "tia", "fuentes", nombre), encoding="ascii") as fh:
-        return fh.read().replace("\r\n", "\n")
-
-
-# Nombres largos que se repiten
-NIV = '"DB_Linea".Tanque.'
-LLE = '"DB_Linea".Llenado.'
-PAR = '"DB_Linea".Param.'
-FIFO = '"DB_FIFO".'
+G = Guia()
+paso = G.paso
 
 # ---------------------------------------------------------------------------
 # PARTE A · Proyecto y hardware
@@ -409,72 +345,12 @@ PARTES = [
 
 
 def construir():
-    cuerpo = ""
-    for letra, titulo, pasos in PARTES:
-        cuerpo += f'<h2 class="parte" id="parte-{letra}"><span>Parte {letra}</span> {titulo}</h2>' + "".join(pasos)
-
-    indice = ""
-    n = 0
-    for letra, titulo, _ in PARTES:
-        items = ""
-        for id_, t, p in _pasos:
-            if p == letra:
-                n += 1
-                items += f"<li><a href='#{id_}'><span>{n}</span>{t}</a></li>"
-        indice += f"<div><h4>{letra} · {titulo}</h4><ol>{items}</ol></div>"
-
-    with open(os.path.join(os.path.dirname(__file__), "estilo.css"), encoding="utf-8") as fh:
-        css = fh.read()
-    with open(os.path.join(os.path.dirname(__file__), "estilo_guia.css"), encoding="utf-8") as fh:
-        css += fh.read()
-    return f"""<title>Guía TIA Parte 1</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<style>
-{css}
-</style>
-<div class="wrap">
-  <header class="top">
-    <div class="eyebrow">TFC · Línea de llenado · Guía paso a paso</div>
-    <h1>Parte 1 <span>/ Del proyecto vacío a los primeros bloques KOP</span></h1>
-    <div class="meta">
-      <span>TIA Portal <b>V15</b></span><span>S7-PLCSIM <b>V15</b></span>
-      <span><b>{len(_pasos)}</b> pasos</span><span>Tabla de variables <b>{e(D.REVISION)}</b></span>
-    </div>
-  </header>
-  <nav class="indice" aria-label="Índice">{indice}</nav>
-  {cuerpo}
-  <section class="sig">
-    <h2>Siguiente: Parte 2</h2>
-    <p>FC2 · Modos y seguridad: AUTO/MANUAL, MARCHA, PARO de fin de ciclo, SETA, REARME, emergencias,
-    válvula de seguridad, baliza y sirena. Es el corazón de la línea y lo haremos con calma.</p>
-  </section>
-  <footer>Generado desde herramientas/guia_parte1.py · Los dibujos KOP salen de herramientas/kop.py</footer>
-</div>
-<script>
-document.querySelectorAll('button.copiar').forEach(function(b){{
-  b.addEventListener('click',function(ev){{
-    ev.preventDefault();
-    var pre=document.getElementById(b.dataset.copiar);
-    var ok=function(){{b.textContent='Copiado';setTimeout(function(){{b.textContent='Copiar';}},1500);}};
-    var fallo=function(){{var r=document.createRange();r.selectNodeContents(pre);var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Seleccionado: Ctrl+C';}};
-    try{{navigator.clipboard.writeText(pre.textContent).then(ok,fallo);}}catch(err){{fallo();}}
-  }});
-}});
-</script>
-"""
+    return G.pagina(1, "Del proyecto vacío a los primeros bloques KOP", PARTES, (
+        "Siguiente: Parte 2",
+        "<p>FC2 · Modos y seguridad: AUTO/MANUAL, MARCHA, PARO de fin de ciclo, SETA, REARME, emergencias, "
+        "válvula de seguridad, baliza y sirena. Es el corazón de la línea y lo haremos con calma.</p>"),
+        "guia_parte1.py")
 
 
 if __name__ == "__main__":
-    pagina = construir()
-    ruta_html = os.path.join(RAIZ, "docs", "02_Guia_Parte1.html")
-    with open(ruta_html, "w", encoding="utf-8") as fh:
-        fh.write('<!doctype html>\n<html lang="es">\n<head>\n<meta charset="utf-8">\n'
-                 '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
-                 '</head>\n<body>\n' + pagina + '\n</body>\n</html>\n')
-    print("HTML ->", ruta_html)
-    if len(sys.argv) > 1:
-        with open(sys.argv[1], "w", encoding="utf-8") as fh:
-            fh.write(pagina)
-        print("Web  ->", sys.argv[1])
+    escribir(construir(), "02_Guia_Parte1.html")

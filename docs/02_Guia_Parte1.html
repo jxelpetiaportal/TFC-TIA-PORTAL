@@ -185,7 +185,7 @@ section.sig p{margin:0;max-width:80ch}
     <h1>Parte 1 <span>/ Del proyecto vacío a los primeros bloques KOP</span></h1>
     <div class="meta">
       <span>TIA Portal <b>V15</b></span><span>S7-PLCSIM <b>V15</b></span>
-      <span><b>16</b> pasos</span><span>Tabla de variables <b>Rev. B</b></span>
+      <span><b>16</b> pasos</span><span>Tabla de variables <b>Rev. C</b></span>
     </div>
   </header>
   <nav class="indice" aria-label="Índice"><div><h4>A · Proyecto y hardware</h4><ol><li><a href='#p-proyecto'><span>1</span>Crear el proyecto</a></li><li><a href='#p-cpu'><span>2</span>Añadir la CPU</a></li><li><a href='#p-modulos'><span>3</span>Añadir los módulos y cambiar sus direcciones</a></li><li><a href='#p-marcas'><span>4</span>Activar las marcas de sistema y de ciclo</a></li><li><a href='#p-sim'><span>5</span>Permitir la simulación</a></li><li><a href='#p-variables'><span>6</span>Importar la tabla de variables</a></li></ol></div><div><h4>B · Datos: UDT y DB</h4><ol><li><a href='#p-udt'><span>7</span>Crear el tipo de datos UDT_Botella</a></li><li><a href='#p-fifo'><span>8</span>Crear DB_FIFO a mano</a></li><li><a href='#p-dblinea'><span>9</span>Crear DB_Linea y DB_Tiempos</a></li><li><a href='#p-compilar1'><span>10</span>Primera compilación</a></li></ol></div><div><h4>C · Cómo se dibuja en KOP</h4><ol><li><a href='#p-kop'><span>11</span>Cómo se dibuja en KOP (léelo una vez)</a></li></ol></div><div><h4>D · Primeros bloques</h4><ol><li><a href='#p-ob30'><span>12</span>OB30 · Reloj de 100 ms y litros</a></li><li><a href='#p-ob100'><span>13</span>OB100 · Arranque seguro</a></li><li><a href='#p-fc1'><span>14</span>FC1 · FC_Entradas</a></li><li><a href='#p-ob1'><span>15</span>Llamar a FC1 desde el OB1</a></li><li><a href='#p-prueba'><span>16</span>Compilar, cargar y probar en PLCSIM</a></li></ol></div></nav>
@@ -213,15 +213,28 @@ NON_RETAIN
          Ciclo_Marcha : Bool := FALSE;   // Ciclo automatico en marcha: se generan botellas.
          Fin_Ciclo : Bool := FALSE;   // Se pulso PARO. No se generan mas botellas; las de la linea terminan.
          Linea_Vacia : Bool := TRUE;   // No queda ninguna botella en la linea (FIFO vacio).
-         Rearme_Pendiente : Bool := TRUE;   // Hubo una emergencia y falta pulsar REARME. Arranca a 1 tras encender la CPU.
+         Rearme_Pendiente : Bool := TRUE;   // Se activa con cualquier causa y solo se borra con REARME cuando ya no queda ninguna. Arranca a 1 al encender la CPU.
          Parada_Seguridad : Bool := TRUE;   // Resumen: hay alguna emergencia activa o memorizada. Para todo y cierra la valvula de seguridad.
       END_STRUCT;
       Emergencia : Struct
-         Seta : Bool := FALSE;   // Seta pulsada.
-         Nivel_99 : Bool := FALSE;   // Tanque al 99 %.
-         Tiempo_40s : Bool := FALSE;   // Una botella lleva mas de 40 s en la linea.
-         Manual : Bool := FALSE;   // Selector en MANUAL.
-         Fallo_Equipo : Bool := FALSE;   // Alguna fase tiene lampara roja (fallo de cilindro, sensor, etc.).
+         Seta : Bool := FALSE;   // Causa activa ahora: seta pulsada.
+         Nivel_99 : Bool := FALSE;   // Causa activa ahora: tanque al 99 %.
+         Tiempo_40s : Bool := FALSE;   // Causa activa ahora: alguna botella pasa de 40 s. La escribe FC9.
+         Manual : Bool := FALSE;   // Causa activa ahora: selector en MANUAL.
+         Fallo_Equipo : Bool := FALSE;   // Causa activa ahora: alguna fase tiene un fallo rojo. La escribe FC10.
+         Hay_Causa : Bool := FALSE;   // Resumen: alguna de las 5 causas esta activa ahora.
+         Memo_Sirena : Bool := FALSE;   // Sirena sonando: se activa al aparecer una emergencia y se silencia con REARME.
+         Memo_Baliza : Bool := FALSE;   // Baliza parpadeando: desde que aparece una emergencia hasta que se completa el rearme.
+      END_STRUCT;
+      Flancos : Struct
+         Marcha_FM : Bool := FALSE;   // Memoria de flanco de PB_Marcha. No se usa para nada mas.
+         Rearme_FM : Bool := FALSE;   // Memoria de flanco de PB_Rearme.
+         Seta_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Seta.
+         Nivel99_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Nivel_99.
+         T40_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Tiempo_40s.
+         Fallo_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Fallo_Equipo.
+         Marcha_Pulso : Bool := FALSE;   // Vale 1 durante un solo ciclo al pulsar MARCHA.
+         Rearme_Pulso : Bool := FALSE;   // Vale 1 durante un solo ciclo al pulsar REARME.
       END_STRUCT;
       Tanque : Struct
          Nivel_Pct : Real := 0.0;   // Nivel del tanque en % (desde IW64).
@@ -428,13 +441,11 @@ END_DATA_BLOCK
 ┃ &quot;DB_Linea&quot;.Param.Simulacion_FIO  &quot;S_Tanque_99&quot;               │
 ┃───────────────|/|─────────────────────| |────────────────────┘</pre></div><div class="segtxt">Igual, con 99.0 e I3.5. Este es el que dispara la emergencia del 99 %.</div></figure><div class="tip"><b>Truco</b> Haz el segmento 5 completo, cópialo (Ctrl+C sobre el segmento, Ctrl+V) y en la copia cambia solo el 25 por el 90. Tardas la mitad.</div></div></section><section class="paso" id="p-ob1"><div class="pnum">15</div><div class="pbody"><h3>Llamar a FC1 desde el OB1</h3><ol class='acc'><li>Abre <span class='mono'>Main [OB1]</span>.</li><li>Arrastra <span class='mono'>FC_Entradas</span> desde el árbol del proyecto al segmento 1.</li><li>Título del segmento: <span class='mono'>FC1 · Entradas y escalados</span>.</li></ol><div class='kopw'><pre class='kop'>┃      ┌───────────────┐
 ┃      │ &quot;FC_Entradas&quot; │
-┃      │               │
 ┃──────┤EN          ENO├───
 ┃      └───────────────┘</pre></div><p>El resto de FC se irán llamando en los segmentos siguientes, en orden (FC2, FC3…).</p></div></section><section class="paso" id="p-prueba"><div class="pnum">16</div><div class="pbody"><h3>Compilar, cargar y probar en PLCSIM</h3><h4>Cargar</h4><ol class='acc'><li>Compila: clic derecho en <span class='mono'>PLC_Linea</span> › Compilar › Hardware y software (solo cambios). Debe dar 0 errores.</li><li>Selecciona <span class='mono'>PLC_Linea</span> y pulsa el botón <b>Iniciar simulación</b> de la barra de herramientas.</li><li>Se abre PLCSIM y la ventana <b>Carga avanzada</b>. Tipo de interfaz PG/PC: <b>PN/IE</b>. Pulsa <b>Iniciar búsqueda</b>, elige la CPU que aparece y pulsa <b>Cargar</b>.</li><li>En el resumen pulsa <b>Cargar</b>, marca <b>Arrancar todos</b> y <b>Finalizar</b>. La CPU de PLCSIM pasa a RUN (verde).</li></ol><h4>Probar (tabla SIM)</h4><ol class='acc'><li>En PLCSIM cambia a la <b>vista del proyecto</b> (icono arriba a la derecha). Abre <b>Tablas SIM › Tabla SIM_1</b>.</li><li>Añade <span class='mono'>AI_Nivel_Tanque</span>, <span class='mono'>AI_Caudalimetro</span> y <span class='mono'>S_Tanque_25</span>.</li><li>En TIA abre <span class='mono'>DB_Linea</span> y pulsa <b>Observar todo</b> (las gafas).</li></ol><div class="tw"><table class="vt"><thead><tr><th>Prueba</th><th>Pon en la tabla SIM</th><th>Debes ver en DB_Linea</th></tr></thead><tbody><tr><td>1</td><td>AI_Nivel_Tanque = 13824</td><td>Nivel_Pct = 50.0 · Nivel_25 = TRUE · Nivel_90 = FALSE</td></tr><tr><td>2</td><td>AI_Nivel_Tanque = 27000</td><td>Nivel_Pct ≈ 97.66 · Nivel_90 = TRUE · Nivel_99 = FALSE</td></tr><tr><td>3</td><td>AI_Nivel_Tanque = 27400</td><td>Nivel_99 = TRUE</td></tr><tr><td>4</td><td>AI_Nivel_Tanque = 5000</td><td>Nivel_Pct ≈ 18.1 · Nivel_25 = FALSE</td></tr><tr><td>5</td><td>AI_Caudalimetro = 27648</td><td>Caudal_Lmin = 10.0</td></tr><tr><td>6</td><td>Además, en TIA fuerza Llenado.En_Curso = TRUE (clic derecho en el valor › Modificar)</td><td>Volumen_L sube 1 L cada 6 s. Reloj.Base_100ms sube 10 por segundo.</td></tr><tr><td>7</td><td>En TIA pon Param.Simulacion_FIO = FALSE y en la tabla SIM S_Tanque_25 = 1</td><td>Nivel_25 sigue al sensor I3.3, no al nivel. Vuelve a poner Simulacion_FIO = TRUE al terminar.</td></tr></tbody></table></div><div class="ojo"><b>Ojo</b> Al acabar la prueba 6 vuelve a poner <span class='mono'>En_Curso = FALSE</span>. Si no, el volumen sigue subiendo.</div></div></section>
   <section class="sig">
     <h2>Siguiente: Parte 2</h2>
-    <p>FC2 · Modos y seguridad: AUTO/MANUAL, MARCHA, PARO de fin de ciclo, SETA, REARME, emergencias,
-    válvula de seguridad, baliza y sirena. Es el corazón de la línea y lo haremos con calma.</p>
+    <p>FC2 · Modos y seguridad: AUTO/MANUAL, MARCHA, PARO de fin de ciclo, SETA, REARME, emergencias, válvula de seguridad, baliza y sirena. Es el corazón de la línea y lo haremos con calma.</p>
   </section>
   <footer>Generado desde herramientas/guia_parte1.py · Los dibujos KOP salen de herramientas/kop.py</footer>
 </div>

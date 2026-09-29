@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>Guía TIA Parte 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#eef2f4; --surface:#ffffff; --surface-2:#f6f8f9; --ink:#172229; --muted:#56656e;
+  --rule:#d3dce1; --accent:#0a6a86; --accent-soft:#dcedf2;
+  --in:#0a6a86; --in-bg:#e0eff4; --out:#6547a8; --out-bg:#ece7f7; --mem:#4a5963; --mem-bg:#e6ebee;
+  --g:#23904a; --o:#e3880b; --r:#cf3228; --off:#c9d2d7;
+  --water:#9fd1e3; --belt:#c7d0d5; --beltln:#9aa7ae;
+  --f-disp:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0f1519; --surface:#162027; --surface-2:#1b2730; --ink:#e2eaee; --muted:#95a5ae;
+    --rule:#2a3943; --accent:#52b6d3; --accent-soft:#16333d;
+    --in:#6cc3dd; --in-bg:#15323c; --out:#b49cf0; --out-bg:#2a2340; --mem:#aab8c0; --mem-bg:#25313a;
+    --g:#3fbf68; --o:#f3a23a; --r:#f0584d; --off:#33434d;
+    --water:#23586b; --belt:#34434c; --beltln:#4e5f69;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1519; --surface:#162027; --surface-2:#1b2730; --ink:#e2eaee; --muted:#95a5ae;
+  --rule:#2a3943; --accent:#52b6d3; --accent-soft:#16333d;
+  --in:#6cc3dd; --in-bg:#15323c; --out:#b49cf0; --out-bg:#2a2340; --mem:#aab8c0; --mem-bg:#25313a;
+  --g:#3fbf68; --o:#f3a23a; --r:#f0584d; --off:#33434d;
+  --water:#23586b; --belt:#34434c; --beltln:#4e5f69;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top{padding-block:40px 20px;display:grid;gap:14px}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 clamp(34px,6vw,56px)/1 var(--f-disp);letter-spacing:.01em;margin:0;text-wrap:balance;text-transform:uppercase}
+h1 span{color:var(--muted);font-weight:500}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;font:500 13px/1.3 var(--f-mono);color:var(--muted)}
+.meta b{color:var(--ink);font-weight:600}
+nav.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);
+  border-bottom:1px solid var(--rule);padding-block:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+nav.bar .links{display:flex;flex-wrap:wrap;gap:4px 14px;flex:1 1 520px}
+nav.bar a{font:600 15px/1.6 var(--f-disp);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+nav.bar a:hover,nav.bar a:focus-visible{color:var(--accent)}
+.search{flex:0 1 300px;display:flex;align-items:center;gap:8px}
+.search input{width:100%;font:14px var(--f-body);color:var(--ink);background:var(--surface);
+  border:1px solid var(--rule);border-radius:6px;padding:7px 10px}
+.search input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.search output{font:12px var(--f-mono);color:var(--muted);white-space:nowrap}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section{padding-block:36px 8px;scroll-margin-top:64px}
+h2{font:700 30px/1.1 var(--f-disp);text-transform:uppercase;letter-spacing:.02em;margin:0 0 6px;text-wrap:balance}
+h3{font:600 20px/1.2 var(--f-disp);text-transform:uppercase;letter-spacing:.04em;margin:26px 0 10px;color:var(--muted)}
+p.lead{margin:0 0 16px;color:var(--muted);max-width:70ch}
+p.note{font-size:13.5px;color:var(--muted);max-width:90ch;margin:10px 0 0}
+.tw{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:8px}
+table.vt{border-collapse:collapse;width:100%;min-width:760px;font-size:13.5px}
+table.vt th{font:600 12px/1.2 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+  text-align:left;padding:10px 12px;background:var(--surface-2);border-bottom:1px solid var(--rule);white-space:nowrap}
+table.vt td{padding:8px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+table.vt tbody tr:last-child td{border-bottom:0}
+table.vt tbody tr:hover td{background:var(--surface-2)}
+.mono,.ty,.addr{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.nm{font:600 13px/1.35 var(--f-mono);white-space:nowrap}
+.nm.small{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:3px}
+.nm2{font-weight:600}
+.ty{color:var(--muted);font-size:12.5px;white-space:nowrap}
+.cm{min-width:210px}
+.fio{color:var(--muted);font-size:12.5px;min-width:150px}
+.addr{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.addr-in{color:var(--in);background:var(--in-bg)}
+.addr-out{color:var(--out);background:var(--out-bg)}
+.addr-mem{color:var(--mem);background:var(--mem-bg)}
+tr.reserva td{color:var(--muted);font-style:italic}
+tr.grp td{background:var(--accent-soft);font:600 14px/1.2 var(--f-disp);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+tr.grp span{font:500 11px var(--f-mono);color:var(--muted);letter-spacing:0;text-transform:none;margin-left:6px}
+.ret{font:600 11px var(--f-mono);color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:1px 5px}
+.lamp{display:inline-block;width:13px;height:13px;border-radius:50%;vertical-align:-2px;margin-right:7px;
+  box-shadow:inset 0 -2px 3px rgba(0,0,0,.25)}
+.lamp-g{background:var(--g)} .lamp-o{background:var(--o)} .lamp-r{background:var(--r)}
+.lamp.blink{animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{background:var(--off)}}
+@media (prefers-reduced-motion:reduce){.lamp.blink{animation:none;background:linear-gradient(90deg,var(--g) 50%,var(--off) 50%)}}
+table.lamps{min-width:680px}
+table.lamps td{vertical-align:middle}
+.fase{white-space:nowrap}
+.fase b{font-family:var(--f-mono);color:var(--accent);margin-right:6px}
+tr.al-r td:first-child{box-shadow:inset 3px 0 0 var(--r)}
+tr.al-o td:first-child{box-shadow:inset 3px 0 0 var(--o)}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:6px}
+.legend div{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;display:grid;
+  grid-template-columns:auto 1fr;column-gap:4px;align-items:center}
+.legend b{font:600 16px var(--f-disp);text-transform:uppercase;letter-spacing:.04em}
+.legend span:not(.lamp){grid-column:2;color:var(--muted);font-size:13px}
+.fifo{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px}
+ol.steps{margin:0;padding-left:22px;display:grid;gap:8px;max-width:95ch}
+ol.pend{margin:0;padding:0;list-style:none;counter-reset:p;display:grid;gap:10px}
+ol.pend li{counter-increment:p;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:14px 16px 14px 58px;position:relative}
+ol.pend li::before{content:counter(p);position:absolute;left:16px;top:12px;font:700 26px/1 var(--f-disp);color:var(--o)}
+ol.pend.ok li::before{content:"✓";color:var(--g)}
+ol.pend b{font:600 18px/1.2 var(--f-disp);text-transform:uppercase;letter-spacing:.03em}
+ol.pend p{margin:4px 0 0;color:var(--muted);max-width:95ch}
+/* esquema */
+.schem{padding:10px}
+.schem svg{display:block;width:100%;min-width:820px;height:auto}
+.s-lbl{font:600 13px var(--f-body);fill:var(--ink)}
+.s-addr{font:600 11.5px var(--f-mono);fill:var(--accent)}
+.s-note{font:12px var(--f-body);fill:var(--muted)}
+.s-cv{font:600 12px var(--f-mono);fill:var(--muted)}
+.s-pipe{stroke:var(--water);stroke-width:6}
+.s-dev{fill:var(--surface-2);stroke:var(--ink);stroke-width:1.4}
+.s-devin{fill:var(--ink)}
+.s-valve{fill:var(--surface);stroke:var(--ink);stroke-width:1.4;stroke-linejoin:round}
+.s-tank{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+.s-water{fill:var(--water)}
+.s-tick{stroke:var(--ink);stroke-width:1.4}
+.s-belt{fill:var(--belt)} .s-beltln{stroke:var(--beltln);stroke-width:1.5}
+.s-beltbox{stroke:var(--ink);stroke-width:1.2}
+.s-sen{fill:var(--o);stroke:var(--ink);stroke-width:1}
+.s-beam{stroke:var(--o);stroke-width:1.2;stroke-dasharray:3 3}
+.s-rod{stroke:var(--ink);stroke-width:3}
+.s-box{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.4}
+.s-flow{stroke:var(--muted);stroke-width:1.4;fill:none} .s-flowhd{fill:var(--muted)}
+.s-reject{stroke:var(--r);stroke-width:1.6;stroke-dasharray:5 4;fill:none} .s-rejecthd{fill:var(--r)}
+footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--rule);font:12px var(--f-mono);color:var(--muted)}
+tr[hidden]{display:none}
+
+/* ---- Guía paso a paso ---- */
+nav.indice{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding-block:8px 8px}
+nav.indice>div{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:12px 14px}
+nav.indice h4{margin:0 0 8px;font:600 15px/1.2 var(--f-disp);letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+nav.indice ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+nav.indice a{color:var(--ink);text-decoration:none;font-size:14px;display:flex;gap:8px}
+nav.indice a span{font:600 12px/1.6 var(--f-mono);color:var(--muted);min-width:1.6em;text-align:right}
+nav.indice a:hover{color:var(--accent)}
+h2.parte{margin:48px 0 4px;padding-top:14px;border-top:2px solid var(--ink);scroll-margin-top:16px}
+h2.parte span{color:var(--accent);margin-right:8px}
+section.paso{display:grid;grid-template-columns:52px minmax(0,1fr);gap:0 14px;padding-block:22px 6px;scroll-margin-top:16px}
+.pnum{font:700 34px/1 var(--f-disp);color:var(--accent);text-align:right;padding-top:2px}
+.pbody h3{font:700 24px/1.15 var(--f-disp);text-transform:uppercase;letter-spacing:.02em;margin:0 0 10px;color:var(--ink)}
+.pbody h4{font:600 17px/1.2 var(--f-disp);text-transform:uppercase;letter-spacing:.04em;margin:22px 0 8px;color:var(--muted)}
+.pbody p{max-width:78ch;margin:10px 0}
+ol.acc,ul.acc{margin:0 0 10px;padding-left:22px;display:grid;gap:6px;max-width:82ch}
+ol.acc li::marker{font-family:var(--f-mono);font-weight:600;color:var(--muted)}
+.ruta{display:inline;font:500 13px/1.8 var(--f-mono);background:var(--surface-2);border:1px solid var(--rule);border-radius:4px;padding:1px 6px;white-space:normal}
+.ruta b{color:var(--accent)}
+.tip,.ojo{margin:12px 0;padding:10px 14px;border-radius:6px;max-width:82ch;font-size:14px;border:1px solid var(--rule);background:var(--surface)}
+.tip{box-shadow:inset 4px 0 0 var(--g)}
+.ojo{box-shadow:inset 4px 0 0 var(--o)}
+.tip b,.ojo b{font:600 13px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;margin-right:6px}
+.tip b{color:var(--g)} .ojo b{color:var(--o)}
+figure.seg{margin:16px 0 18px;background:var(--surface);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+figure.seg figcaption{padding:9px 14px;background:var(--surface-2);border-bottom:1px solid var(--rule);font-weight:600}
+figure.seg figcaption span{font:600 12px var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-right:8px}
+.kopw{overflow-x:auto;background:var(--surface)}
+pre.kop{margin:0;padding:14px 16px;font:500 13px/1.35 var(--f-mono);color:var(--ink);white-space:pre;tab-size:4}
+.pbody>.kopw{border:1px solid var(--rule);border-radius:8px;margin:10px 0}
+.segtxt{padding:0 16px 12px;font-size:14px;color:var(--muted);max-width:90ch}
+.segtxt:empty{display:none}
+.segtxt p{margin:6px 0}
+details.src{margin:8px 0;background:var(--surface);border:1px solid var(--rule);border-radius:8px}
+details.src summary{cursor:pointer;padding:9px 14px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+details.src pre{margin:0;padding:12px 16px;border-top:1px solid var(--rule);overflow-x:auto;font:12.5px/1.4 var(--f-mono);white-space:pre}
+button.copiar{font:600 12px var(--f-mono);color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent);border-radius:4px;padding:3px 10px;cursor:pointer}
+button.copiar:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section.sig{margin-top:48px;padding:18px 20px;border:1px solid var(--rule);border-radius:8px;background:var(--accent-soft)}
+section.sig h2{color:var(--accent)}
+section.sig p{margin:0;max-width:80ch}
+@media (max-width:560px){section.paso{grid-template-columns:34px minmax(0,1fr);gap:0 10px}.pnum{font-size:26px}}
+
+</style>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">TFC · Línea de llenado · Guía paso a paso</div>
+    <h1>Parte 2 <span>/ FC2 · Modos y seguridad</span></h1>
+    <div class="meta">
+      <span>TIA Portal <b>V15</b></span><span>S7-PLCSIM <b>V15</b></span>
+      <span><b>12</b> pasos</span><span>Tabla de variables <b>Rev. C</b></span>
+    </div>
+  </header>
+  <nav class="indice" aria-label="Índice"><div><h4>A · Antes de empezar</h4><ol><li><a href='#p-idea'><span>1</span>Cómo funciona la seguridad (léelo antes de programar)</a></li><li><a href='#p-db'><span>2</span>Añadir variables nuevas a DB_Linea</a></li></ol></div><div><h4>B · FC2 segmento a segmento</h4><ol><li><a href='#p-crear'><span>3</span>Crear FC2</a></li><li><a href='#p-g1'><span>4</span>Segmentos 1 a 5 · Modo y causas</a></li><li><a href='#p-g2'><span>5</span>Segmentos 6 y 7 · Pulsos de MARCHA y REARME</a></li><li><a href='#p-g3'><span>6</span>Segmentos 8 a 10 · Rearme y parada de seguridad</a></li><li><a href='#p-g4'><span>7</span>Segmentos 11 a 15 · Sirena y baliza</a></li><li><a href='#p-g5'><span>8</span>Segmentos 16 a 19 · Ciclo: MARCHA y PARO de fin de ciclo</a></li><li><a href='#p-g6'><span>9</span>Segmento 20 · Válvula de seguridad</a></li><li><a href='#p-ob1'><span>10</span>Llamar a FC2 desde el OB1</a></li></ol></div><div><h4>C · Probar en PLCSIM</h4><ol><li><a href='#p-tablas'><span>11</span>Preparar las tablas de prueba</a></li><li><a href='#p-pruebas'><span>12</span>Las 13 pruebas de FC2</a></li></ol></div></nav>
+  <h2 class="parte" id="parte-A"><span>Parte A</span> Antes de empezar</h2><section class="paso" id="p-idea"><div class="pnum">1</div><div class="pbody"><h3>Cómo funciona la seguridad (léelo antes de programar)</h3><p>Toda la seguridad de la línea se apoya en una sola idea:</p><ol class='acc'><li>Cada <b>causa</b> de emergencia es un bit que vale 1 <b>solo mientras la causa existe</b> (la seta está pulsada, el nivel está al 99 %…). No se memoriza.</li><li>La memoria está en un único bit: <span class='mono'>Modo.Rearme_Pendiente</span>. Se activa con cualquier causa y <b>solo se borra al pulsar REARME cuando ya no queda ninguna causa</b>.</li><li><span class='mono'>Modo.Parada_Seguridad</span> = hay causa <b>o</b> falta el rearme. Todas las FC de la línea lo miran: si vale 1, no mueven nada.</li></ol><p>Así, aunque sueltes la seta, la línea no arranca sola: siempre hace falta REARME y luego MARCHA.</p><h4>Estados de la línea</h4><div class="tw"><table class="vt"><thead><tr><th>Estado de la línea</th><th>Cómo lo ve el programa</th><th>Piloto (lo hará FC10)</th><th>Cómo se sale</th></tr></thead><tbody><tr><td><b>Parada de seguridad</b></td><td><span class='mono'>Hay_Causa = 1</span></td><td>REARME fijo · baliza si no es MANUAL</td><td>Quitar la causa</td></tr><tr><td><b>Rearme pendiente</b></td><td><span class='mono'>Hay_Causa = 0 y Rearme_Pendiente = 1</span></td><td>REARME parpadeando</td><td>Pulsar REARME</td></tr><tr><td><b>Lista, esperando MARCHA</b></td><td><span class='mono'>Parada_Seguridad = 0 y Ciclo_Marcha = 0</span></td><td>PARO fijo</td><td>Pulsar MARCHA</td></tr><tr><td><b>En marcha</b></td><td><span class='mono'>Ciclo_Marcha = 1 y Fin_Ciclo = 0</span></td><td>MARCHA fijo</td><td>PARO → terminando</td></tr><tr><td><b>Terminando</b> (fin de ciclo)</td><td><span class='mono'>Ciclo_Marcha = 1 y Fin_Ciclo = 1</span></td><td>PARO parpadeando</td><td>Al vaciarse la línea → Lista. MARCHA → vuelve a En marcha</td></tr></tbody></table></div><h4>Las 5 causas</h4><div class="tw"><table class="vt"><thead><tr><th>Causa</th><th>Bit en DB_Linea</th><th>Quién lo escribe</th><th>Sirena y baliza</th><th>Para poder rearmar</th></tr></thead><tbody><tr><td>Seta pulsada</td><td><span class='mono'>Emergencia.Seta</span></td><td>FC2</td><td>Sí</td><td>Desenclavar la seta</td></tr><tr><td>Tanque al 99 %</td><td><span class='mono'>Emergencia.Nivel_99</span></td><td>FC2 (con el nivel de FC1)</td><td>Sí</td><td>Que el nivel baje del 99 %</td></tr><tr><td>Botella más de 40 s</td><td><span class='mono'>Emergencia.Tiempo_40s</span></td><td>FC9 (más adelante)</td><td>Sí</td><td>Se definirá en FC9</td></tr><tr><td>Selector en MANUAL</td><td><span class='mono'>Emergencia.Manual</span></td><td>FC2</td><td><b>No</b></td><td>Volver a AUTO</td></tr><tr><td>Fallo rojo de una fase</td><td><span class='mono'>Emergencia.Fallo_Equipo</span></td><td>FC10 (más adelante)</td><td>Sí</td><td>Corregir el fallo</td></tr></tbody></table></div><div class="tip"><b>Truco</b> Las causas de 40 s y de fallo rojo las escribirán FC9 y FC10. Hasta entonces valen 0 y no molestan: puedes programar y probar FC2 completo ya.</div></div></section><section class="paso" id="p-db"><div class="pnum">2</div><div class="pbody"><h3>Añadir variables nuevas a DB_Linea</h3><p>FC2 necesita 3 variables nuevas en el Struct <span class='mono'>Emergencia</span> y un Struct nuevo, <span class='mono'>Flancos</span>. Tienes dos caminos:</p><h4>Camino A · A mano</h4><ol class='acc'><li>Abre <span class='mono'>DB_Linea</span>.</li><li>Despliega <span class='mono'>Emergencia</span>. Debajo de <span class='mono'>Fallo_Equipo</span> añade <span class='mono'>Hay_Causa</span>, <span class='mono'>Memo_Sirena</span> y <span class='mono'>Memo_Baliza</span>, todas Bool.</li><li>Justo debajo del Struct <span class='mono'>Emergencia</span> (al mismo nivel) crea el Struct <span class='mono'>Flancos</span> con sus 8 Bool.</li></ol><div class="tw"><table class="vt"><thead><tr><th>Struct</th><th>Nombre</th><th>Tipo</th><th>Para qué</th></tr></thead><tbody><tr><td><span class='mono'>Emergencia</span></td><td><span class='nm'>Hay_Causa</span></td><td><span class='ty'>Bool</span></td><td>Resumen: alguna de las 5 causas está activa ahora.</td></tr><tr><td><span class='mono'>Emergencia</span></td><td><span class='nm'>Memo_Sirena</span></td><td><span class='ty'>Bool</span></td><td>Sirena sonando: se activa al aparecer una emergencia y se silencia con REARME.</td></tr><tr><td><span class='mono'>Emergencia</span></td><td><span class='nm'>Memo_Baliza</span></td><td><span class='ty'>Bool</span></td><td>Baliza parpadeando: desde que aparece una emergencia hasta que se completa el rearme.</td></tr><tr><td><span class='mono'>Flancos</span></td><td><span class='nm'>Marcha_FM</span></td><td><span class='ty'>Bool</span></td><td>Memoria de flanco de PB_Marcha. No se usa para nada más.</td></tr><tr><td><span class='mono'>Flancos</span></td><td><span class='nm'>Rearme_FM</span></td><td><span class='ty'>Bool</span></td><td>Memoria de flanco de PB_Rearme.</td></tr><tr><td><span class='mono'>Flancos</span></td><td><span class='nm'>Seta_FM</span></td><td><span class='ty'>Bool</span></td><td>Memoria de flanco de Emergencia.Seta.</td></tr><tr><td><span class='mono'>Flancos</span></td><td><span class='nm'>Nivel99_FM</span></td><td><span class='ty'>Bool</span></td><td>Memoria de flanco de Emergencia.Nivel_99.</td></tr><tr><td><span class='mono'>Flancos</span></td><td><span class='nm'>T40_FM</span></td><td><span class='ty'>Bool</span></td><td>Memoria de flanco de Emergencia.Tiempo_40s.</td></tr><tr><td><span class='mono'>Flancos</span></td><td><span class='nm'>Fallo_FM</span></td><td><span class='ty'>Bool</span></td><td>Memoria de flanco de Emergencia.Fallo_Equipo.</td></tr><tr><td><span class='mono'>Flancos</span></td><td><span class='nm'>Marcha_Pulso</span></td><td><span class='ty'>Bool</span></td><td>Vale 1 durante un solo ciclo al pulsar MARCHA.</td></tr><tr><td><span class='mono'>Flancos</span></td><td><span class='nm'>Rearme_Pulso</span></td><td><span class='ty'>Bool</span></td><td>Vale 1 durante un solo ciclo al pulsar REARME.</td></tr></tbody></table></div><h4>Camino B · Fuente externa actualizada</h4><ol class='acc'><li>En Fuentes externas, borra el <span class='mono'>02_DB_Linea.db</span> antiguo y añade el nuevo (texto abajo).</li><li>Clic derecho › <b>Generar bloques a partir de la fuente</b> › acepta sobrescribir DB_Linea.</li></ol><details class="src"><summary><span class="mono">02_DB_Linea.db</span><button type="button" class="copiar" data-copiar="src-02_DB_Linea">Copiar</button></summary><pre id="src-02_DB_Linea">DATA_BLOCK &quot;DB_Linea&quot;
+{ S7_Optimized_Access := &#x27;TRUE&#x27; }
+VERSION : 0.1
+NON_RETAIN
+   VAR 
+      Modo : Struct
+         Auto : Bool := FALSE;   // Selector en AUTO.
+         Ciclo_Marcha : Bool := FALSE;   // Ciclo automatico en marcha: se generan botellas.
+         Fin_Ciclo : Bool := FALSE;   // Se pulso PARO. No se generan mas botellas; las de la linea terminan.
+         Linea_Vacia : Bool := TRUE;   // No queda ninguna botella en la linea (FIFO vacio).
+         Rearme_Pendiente : Bool := TRUE;   // Se activa con cualquier causa y solo se borra con REARME cuando ya no queda ninguna. Arranca a 1 al encender la CPU.
+         Parada_Seguridad : Bool := TRUE;   // Resumen: hay alguna emergencia activa o memorizada. Para todo y cierra la valvula de seguridad.
+      END_STRUCT;
+      Emergencia : Struct
+         Seta : Bool := FALSE;   // Causa activa ahora: seta pulsada.
+         Nivel_99 : Bool := FALSE;   // Causa activa ahora: tanque al 99 %.
+         Tiempo_40s : Bool := FALSE;   // Causa activa ahora: alguna botella pasa de 40 s. La escribe FC9.
+         Manual : Bool := FALSE;   // Causa activa ahora: selector en MANUAL.
+         Fallo_Equipo : Bool := FALSE;   // Causa activa ahora: alguna fase tiene un fallo rojo. La escribe FC10.
+         Hay_Causa : Bool := FALSE;   // Resumen: alguna de las 5 causas esta activa ahora.
+         Memo_Sirena : Bool := FALSE;   // Sirena sonando: se activa al aparecer una emergencia y se silencia con REARME.
+         Memo_Baliza : Bool := FALSE;   // Baliza parpadeando: desde que aparece una emergencia hasta que se completa el rearme.
+      END_STRUCT;
+      Flancos : Struct
+         Marcha_FM : Bool := FALSE;   // Memoria de flanco de PB_Marcha. No se usa para nada mas.
+         Rearme_FM : Bool := FALSE;   // Memoria de flanco de PB_Rearme.
+         Seta_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Seta.
+         Nivel99_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Nivel_99.
+         T40_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Tiempo_40s.
+         Fallo_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Fallo_Equipo.
+         Marcha_Pulso : Bool := FALSE;   // Vale 1 durante un solo ciclo al pulsar MARCHA.
+         Rearme_Pulso : Bool := FALSE;   // Vale 1 durante un solo ciclo al pulsar REARME.
+      END_STRUCT;
+      Tanque : Struct
+         Nivel_Pct : Real := 0.0;   // Nivel del tanque en % (desde IW64).
+         Nivel_25 : Bool := FALSE;   // Sensor 25 % usado por el programa. Viene de I3.3 o, en simulacion, de Nivel_Pct &gt;= 25.
+         Nivel_90 : Bool := FALSE;   // Sensor 90 % usado por el programa (I3.4 o Nivel_Pct &gt;= 90).
+         Nivel_99 : Bool := FALSE;   // Sensor 99 % usado por el programa (I3.5 o Nivel_Pct &gt;= 99).
+         Bomba_Marcha : Bool := FALSE;   // Bomba pedida: SET por debajo del 25 %, RESET al 90 % o con emergencia.
+         Aviso_Nivel_Bajo : Bool := FALSE;   // Nivel por debajo del 25 %: el llenado de botellas espera (naranja).
+      END_STRUCT;
+      Llenado : Struct
+         Caudal_Lmin : Real := 0.0;   // Caudal instantaneo en l/min (desde IW66).
+         Volumen_L : Real := 0.0;   // Litros que han entrado en la botella actual.
+         Consigna_L : Real := 0.0;   // Litros a alcanzar: 90 % de 0,5 L = 0,45 L - 90 % de 2 L = 1,8 L.
+         En_Curso : Bool := FALSE;   // Valvula de llenado abierta, sumando litros.
+         Malas_Seguidas : Int := 0;   // Botellas malas consecutivas. 3 seguidas = rojo A303.
+      END_STRUCT;
+      Generador : Struct
+         Peticion : Bool := FALSE;   // Se cumplen las condiciones para pedir una botella nueva.
+      END_STRUCT;
+      Cajas : Struct
+         Cnt_Malas : Int := 0;   // Botellas en la caja de malas (0...20).
+         Cnt_05L : Int := 0;   // Botellas en la caja de 0,5 L (0...6).
+         Cnt_2L : Int := 0;   // Botellas en la caja de 2 L (0...6).
+         Cambiando_Malas : Bool := FALSE;   // Cambio de caja de malas en curso (naranja).
+         Cambiando_05L : Bool := FALSE;   // Cambio de caja de 0,5 L en curso (naranja).
+         Cambiando_2L : Bool := FALSE;   // Cambio de caja de 2 L en curso (naranja).
+      END_STRUCT;
+      Reloj : Struct
+         Base_100ms : DInt := 0;   // Se suma 1 cada 100 ms en el OB30. Sirve para medir el tiempo de cada botella (40 s = 400).
+      END_STRUCT;
+   END_VAR
+   VAR RETAIN
+      Produccion : Struct
+         Total_Buenas_05L : DInt := 0;   // Contador historico de botellas buenas de 0,5 L.
+         Total_Buenas_2L : DInt := 0;   // Contador historico de botellas buenas de 2 L.
+         Total_Malas : DInt := 0;   // Contador historico de botellas malas.
+         Total_Cajas_05L : DInt := 0;   // Cajas de 0,5 L completadas.
+         Total_Cajas_2L : DInt := 0;   // Cajas de 2 L completadas.
+         Total_Cajas_Malas : DInt := 0;   // Cajas de malas completadas.
+      END_STRUCT;
+      Param : Struct
+         Simulacion_FIO : Bool := TRUE;   // TRUE = niveles desde el nivel analogico (Factory I/O). FALSE = sensores reales I3.3-I3.5.
+         Max_Botellas : Int := 3;   // Botellas a la vez en la linea (1 a 4).
+         T_Espera_Emision : Time := T#8s;   // Tiempo minimo entre dos botellas nuevas.
+         Limite_Botella_100ms : DInt := 400;   // Tiempo maximo de una botella en la linea: 400 x 100 ms = 40 s.
+         Pct_Llenado : Real := 90.0;   // Porcentaje de llenado objetivo.
+         Vol_Botella_05 : Real := 0.5;   // Capacidad botella pequena (L).
+         Vol_Botella_2 : Real := 2.0;   // Capacidad botella grande (L).
+         Caudal_Max_Lmin : Real := 10.0;   // Caudal que corresponde a 27648 en IW66. A calibrar con Factory I/O.
+         Apertura_Llenado : Int := 13824;   // Apertura de la valvula de llenado: 13824 = 50 %.
+         T_Max_Llenado_05 : Time := T#6s;   // Si en este tiempo no se llega a 0,45 L, la botella es MALA.
+         T_Max_Llenado_2 : Time := T#10s;   // Si en este tiempo no se llega a 1,8 L, la botella es MALA.
+         T_Taponado : Time := T#2s;   // Tiempo con el cabezal de TAP-01 abajo (apriete del tapon).
+         T_Max_Cilindro : Time := T#3s;   // Tiempo maximo de movimiento de TAP-01 y del empujador. Si se pasa: rojo.
+         T_Cambio_Caja : Time := T#3s;   // Duracion del cambio de caja (retirar + poner nueva).
+         Cap_Caja_Buenas : Int := 6;   // Botellas por caja de buenas.
+         Cap_Caja_Malas : Int := 20;   // Botellas por caja de malas.
+         T_Max_Relleno_Tanque : Time := T#120s;   // Bomba en marcha mas de este tiempo sin llegar al 90 %: aviso naranja.
+      END_STRUCT;
+   END_VAR
+
+BEGIN
+
+END_DATA_BLOCK
+</pre></details><div class="ojo"><b>Ojo</b> Si regeneras DB_Linea desde la fuente, los parámetros vuelven a sus valores iniciales. Ahora mismo da igual porque aún no has cambiado ninguno.</div></div></section><h2 class="parte" id="parte-B"><span>Parte B</span> FC2 segmento a segmento</h2><section class="paso" id="p-crear"><div class="pnum">3</div><div class="pbody"><h3>Crear FC2</h3><ol class='acc'><li>Agregar nuevo bloque › <b>Función (FC)</b>. Nombre <span class='mono'>FC_Modos_Seguridad</span>, lenguaje KOP, número manual <span class='mono'>2</span>.</li><li>Esta FC no necesita variables en la interfaz: todo lo que usa está en DB_Linea y en la tabla de variables.</li><li>Vas a hacer 20 segmentos. Están agrupados en 6 pasos; pon a cada segmento el título que indica la guía.</li></ol></div></section><section class="paso" id="p-g1"><div class="pnum">4</div><div class="pbody"><h3>Segmentos 1 a 5 · Modo y causas</h3><figure class="seg"><figcaption><span>Segmento 1</span> Modo AUTO</figcaption><div class="kopw"><pre class="kop">┃ &quot;SEL_Auto&quot;     &quot;DB_Linea&quot;.Modo.Auto
+┃────| |──────────────────────────( )─</pre></div><div class="segtxt">Copia el selector a DB_Linea. El resto del programa mira siempre la variable del DB, nunca la entrada directa.</div></figure><figure class="seg"><figcaption><span>Segmento 2</span> Causa: seta pulsada</figcaption><div class="kopw"><pre class="kop">┃ &quot;SETA_Emergencia&quot;     &quot;DB_Linea&quot;.Emergencia.Seta
+┃────────|/|───────────────────────────────────( )─</pre></div><div class="segtxt">La seta es NC: en reposo la entrada vale 1 y al pulsarla vale 0. Por eso el contacto es cerrado <span class='mono'>|/|</span>: da 1 justo cuando la seta está pulsada, o si se corta el cable.</div></figure><figure class="seg"><figcaption><span>Segmento 3</span> Causa: tanque al 99 %</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Tanque.Nivel_99     &quot;DB_Linea&quot;.Emergencia.Nivel_99
+┃────────────| |────────────────────────────────────────────( )─</pre></div><div class="segtxt">El sensor lo calcula FC1 (real o simulado).</div></figure><figure class="seg"><figcaption><span>Segmento 4</span> Causa: modo MANUAL</figcaption><div class="kopw"><pre class="kop">┃ &quot;SEL_Auto&quot;     &quot;DB_Linea&quot;.Emergencia.Manual
+┃────|/|──────────────────────────────────( )─</pre></div><div class="segtxt"></div></figure><figure class="seg"><figcaption><span>Segmento 5</span> Resumen de causas</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Emergencia.Seta              &quot;DB_Linea&quot;.Emergencia.Hay_Causa
+┃────────────| |─────────────────────┬────────────────────────────────( )─
+┃                                    │
+┃ &quot;DB_Linea&quot;.Emergencia.Nivel_99     │
+┃──────────────| |───────────────────┤
+┃                                    │
+┃ &quot;DB_Linea&quot;.Emergencia.Tiempo_40s   │
+┃───────────────| |──────────────────┤
+┃                                    │
+┃ &quot;DB_Linea&quot;.Emergencia.Manual       │
+┃─────────────| |────────────────────┤
+┃                                    │
+┃ &quot;DB_Linea&quot;.Emergencia.Fallo_Equipo │
+┃────────────────| |─────────────────┘</pre></div><div class="segtxt">Cinco ramas en paralelo (OR). Si cualquiera vale 1, hay causa. Para hacerlo: pon el primer contacto, abre rama debajo, pon el segundo, cierra la rama, y repite.</div></figure></div></section><section class="paso" id="p-g2"><div class="pnum">5</div><div class="pbody"><h3>Segmentos 6 y 7 · Pulsos de MARCHA y REARME</h3><figure class="seg"><figcaption><span>Segmento 6</span> Pulso de MARCHA</figcaption><div class="kopw"><pre class="kop">┃         &quot;PB_Marcha&quot;              &quot;DB_Linea&quot;.Flancos.Marcha_Pulso
+┃─────────────|P|──────────────────────────────────────────────( )─
+┃ &quot;DB_Linea&quot;.Flancos.Marcha_FM</pre></div><div class="segtxt">El contacto <span class='mono'>|P|</span> da 1 durante un solo ciclo cuando la entrada pasa de 0 a 1. Debajo lleva un bit de memoria (<span class='mono'>Marcha_FM</span>) donde TIA guarda cómo estaba la entrada en el ciclo anterior.</div></figure><figure class="seg"><figcaption><span>Segmento 7</span> Pulso de REARME</figcaption><div class="kopw"><pre class="kop">┃         &quot;PB_Rearme&quot;              &quot;DB_Linea&quot;.Flancos.Rearme_Pulso
+┃─────────────|P|──────────────────────────────────────────────( )─
+┃ &quot;DB_Linea&quot;.Flancos.Rearme_FM</pre></div><div class="segtxt"></div></figure><div class="ojo"><b>Ojo</b> Cada <span class='mono'>|P|</span> necesita su propio bit de memoria y ese bit no se usa en ningún otro sitio. Si repites un bit de memoria en dos flancos, los dos fallan.</div><div class="tip"><b>Truco</b> Por eso sacamos el pulso a una variable (<span class='mono'>Marcha_Pulso</span>): la podemos usar en todos los segmentos que queramos sin repetir el flanco.</div></div></section><section class="paso" id="p-g3"><div class="pnum">6</div><div class="pbody"><h3>Segmentos 8 a 10 · Rearme y parada de seguridad</h3><figure class="seg"><figcaption><span>Segmento 8</span> Rearme pendiente: se activa con cualquier causa</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Emergencia.Hay_Causa     &quot;DB_Linea&quot;.Modo.Rearme_Pendiente
+┃───────────────| |────────────────────────────────────────────────(S)─</pre></div><div class="segtxt">Bobina <span class='mono'>(S)</span>: una vez activada se queda a 1 aunque la causa desaparezca.</div></figure><figure class="seg"><figcaption><span>Segmento 9</span> Rearme pendiente: se borra con REARME si no queda ninguna causa</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Flancos.Rearme_Pulso  &quot;DB_Linea&quot;.Emergencia.Hay_Causa     &quot;DB_Linea&quot;.Modo.Rearme_Pendiente
+┃───────────────| |──────────────────────────────|/|────────────────────────────────────────────────(R)─</pre></div><div class="segtxt">Si pulsas REARME con la seta todavía pulsada, no pasa nada: el contacto cerrado de <span class='mono'>Hay_Causa</span> lo impide.</div></figure><figure class="seg"><figcaption><span>Segmento 10</span> Parada de seguridad</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Emergencia.Hay_Causa       &quot;DB_Linea&quot;.Modo.Parada_Seguridad
+┃───────────────| |────────────────┬─────────────────────────────────( )─
+┃                                  │
+┃ &quot;DB_Linea&quot;.Modo.Rearme_Pendiente │
+┃───────────────| |────────────────┘</pre></div><div class="segtxt">Esta es la variable que mirarán todas las FC: si vale 1, nada se mueve.</div></figure></div></section><section class="paso" id="p-g4"><div class="pnum">7</div><div class="pbody"><h3>Segmentos 11 a 15 · Sirena y baliza</h3><figure class="seg"><figcaption><span>Segmento 11</span> Sirena: REARME la silencia</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Flancos.Rearme_Pulso     &quot;DB_Linea&quot;.Emergencia.Memo_Sirena
+┃───────────────| |─────────────────────────────────────────────────(R)─</pre></div><div class="segtxt">Tal como acordamos: REARME silencia la sirena aunque la causa siga activa.</div></figure><figure class="seg"><figcaption><span>Segmento 12</span> Emergencia nueva: sirena y baliza</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Emergencia.Seta              &quot;DB_Linea&quot;.Emergencia.Memo_Sirena
+┃────────────|P|─────────────────────┬──┬───────────────────────────────(S)─
+┃ &quot;DB_Linea&quot;.Flancos.Seta_FM         │  │
+┃ &quot;DB_Linea&quot;.Emergencia.Nivel_99     │  │ &quot;DB_Linea&quot;.Emergencia.Memo_Baliza
+┃──────────────|P|───────────────────┤  └───────────────────────────────(S)─
+┃ &quot;DB_Linea&quot;.Flancos.Nivel99_FM      │
+┃ &quot;DB_Linea&quot;.Emergencia.Tiempo_40s   │
+┃───────────────|P|──────────────────┤
+┃    &quot;DB_Linea&quot;.Flancos.T40_FM       │
+┃ &quot;DB_Linea&quot;.Emergencia.Fallo_Equipo │
+┃────────────────|P|─────────────────┘
+┃    &quot;DB_Linea&quot;.Flancos.Fallo_FM</pre></div><div class="segtxt"><p>Cuatro flancos en paralelo: la sirena y la baliza se disparan <b>cuando aparece</b> una causa, no mientras dura. Así, si silencias con REARME y luego aparece otra causa distinta, la sirena vuelve a sonar.</p><p>MANUAL no está aquí a propósito: pasar a MANUAL no hace sonar la sirena.</p></div></figure><div class="ojo"><b>Ojo</b> El segmento 11 va <b>antes</b> que el 12. Si en el mismo ciclo se pulsa REARME y aparece una emergencia nueva, gana la emergencia y la sirena suena.</div><figure class="seg"><figcaption><span>Segmento 13</span> Baliza: se apaga al completar el rearme</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Modo.Rearme_Pendiente     &quot;DB_Linea&quot;.Emergencia.Memo_Baliza
+┃───────────────|/|──────────────────────────────────────────────────(R)─</pre></div><div class="segtxt">La baliza sigue avisando mientras la causa exista o falte el rearme.</div></figure><figure class="seg"><figcaption><span>Segmento 14</span> Salida: sirena</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Emergencia.Memo_Sirena     &quot;Sirena&quot;
+┃────────────────| |─────────────────────────( )─</pre></div><div class="segtxt"></div></figure><figure class="seg"><figcaption><span>Segmento 15</span> Salida: baliza intermitente y prueba de lámparas</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Emergencia.Memo_Baliza  &quot;Clock_2Hz&quot;      &quot;Baliza_Naranja&quot;
+┃────────────────| |─────────────────────| |─────┬─────────────────( )─
+┃                                                │
+┃ &quot;PB_Prueba_Lamparas&quot;                           │
+┃─────────| |────────────────────────────────────┘</pre></div><div class="segtxt">La marca de ciclo <span class='mono'>Clock_2Hz</span> hace el parpadeo. Con el pulsador de prueba se enciende fija.</div></figure></div></section><section class="paso" id="p-g5"><div class="pnum">8</div><div class="pbody"><h3>Segmentos 16 a 19 · Ciclo: MARCHA y PARO de fin de ciclo</h3><figure class="seg"><figcaption><span>Segmento 16</span> Línea vacía</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_FIFO&quot;.N_Botellas     &quot;DB_Linea&quot;.Modo.Linea_Vacia
+┃────────| == |────────────────────────────────────( )─
+┃      0   [Int]</pre></div><div class="segtxt">Comparador de igualdad, tipo Int. De momento siempre vale 1 porque todavía no hay botellas en el FIFO.</div></figure><figure class="seg"><figcaption><span>Segmento 17</span> MARCHA: arrancar el ciclo</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Flancos.Marcha_Pulso  &quot;DB_Linea&quot;.Modo.Auto  &quot;DB_Linea&quot;.Modo.Parada_Seguridad  &quot;PB_Paro&quot;     &quot;DB_Linea&quot;.Modo.Ciclo_Marcha
+┃───────────────| |────────────────────────| |─────────────────────────|/|────────────────────| |──────┬──────────────────────────(S)─
+┃                                                                                                      │
+┃                                                                                                      │    &quot;DB_Linea&quot;.Modo.Fin_Ciclo
+┃                                                                                                      └──────────────────────────(R)─</pre></div><div class="segtxt"><p>Arranca solo en AUTO, sin parada de seguridad y con PARO sin pulsar. PARO es NC, por eso aquí el contacto es abierto: vale 1 cuando <b>no</b> está pulsado.</p><p>Si pulsas MARCHA mientras la línea está terminando, se anula el fin de ciclo y sigue produciendo.</p></div></figure><figure class="seg"><figcaption><span>Segmento 18</span> PARO: pedir fin de ciclo</figcaption><div class="kopw"><pre class="kop">┃ &quot;PB_Paro&quot;  &quot;DB_Linea&quot;.Modo.Ciclo_Marcha     &quot;DB_Linea&quot;.Modo.Fin_Ciclo
+┃────|/|─────────────────| |────────────────────────────────────────(S)─</pre></div><div class="segtxt">PARO no para en seco: solo deja de pedir botellas nuevas (lo hará FC4) y espera a que salgan las que hay.</div></figure><figure class="seg"><figcaption><span>Segmento 19</span> Parar el ciclo: fin de ciclo terminado o emergencia</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Modo.Fin_Ciclo  &quot;DB_Linea&quot;.Modo.Linea_Vacia      &quot;DB_Linea&quot;.Modo.Ciclo_Marcha
+┃────────────| |─────────────────────────| |─────────────┬──┬──────────────────────────(R)─
+┃                                                        │  │
+┃ &quot;DB_Linea&quot;.Modo.Parada_Seguridad                       │  │    &quot;DB_Linea&quot;.Modo.Fin_Ciclo
+┃───────────────| |──────────────────────────────────────┘  └──────────────────────────(R)─</pre></div><div class="segtxt">Rama de arriba: se pidió PARO y ya no queda ninguna botella. Rama de abajo: cualquier emergencia corta el ciclo al momento.</div></figure></div></section><section class="paso" id="p-g6"><div class="pnum">9</div><div class="pbody"><h3>Segmento 20 · Válvula de seguridad</h3><figure class="seg"><figcaption><span>Segmento 20</span> Válvula de seguridad del tanque</figcaption><div class="kopw"><pre class="kop">┃ &quot;DB_Linea&quot;.Modo.Auto  &quot;DB_Linea&quot;.Modo.Parada_Seguridad     &quot;VS_Valvula_Seguridad&quot;
+┃─────────| |─────────────────────────|/|───────────────────────────────────────( )─</pre></div><div class="segtxt"><p>La válvula se abre en AUTO y sin parada de seguridad, <b>aunque el ciclo esté parado</b>. Así el tanque mantiene su nivel y está listo cuando pulses MARCHA.</p><p>Con cualquier emergencia, con MANUAL o mientras falte el rearme, se cierra.</p></div></figure></div></section><section class="paso" id="p-ob1"><div class="pnum">10</div><div class="pbody"><h3>Llamar a FC2 desde el OB1</h3><ol class='acc'><li>Abre <span class='mono'>Main [OB1]</span>. Añade un segmento debajo del de FC1.</li><li>Arrastra <span class='mono'>FC_Modos_Seguridad</span> al segmento 2. Título: <span class='mono'>FC2 · Modos y seguridad</span>.</li></ol><div class='kopw'><pre class='kop'>┃      ┌──────────────────────┐
+┃      │ &quot;FC_Modos_Seguridad&quot; │
+┃──────┤EN                 ENO├───
+┃      └──────────────────────┘</pre></div><p>El orden importa: FC1 prepara los sensores y FC2 decide si la línea puede funcionar. Todas las FC que vengan después usarán lo que FC2 ha decidido en este mismo ciclo.</p></div></section><h2 class="parte" id="parte-C"><span>Parte C</span> Probar en PLCSIM</h2><section class="paso" id="p-tablas"><div class="pnum">11</div><div class="pbody"><h3>Preparar las tablas de prueba</h3><h4>En TIA: tabla de observación</h4><ol class='acc'><li>En el árbol: <span class="ruta">PLC_Linea <b>›</b> Tablas de observación y forzado permanente</span> › <b>Agregar tabla de observación</b>. Nombre: <span class='mono'>Obs_FC2</span>.</li><li>Escribe estas variables, una por fila: <span class='mono'>&quot;DB_Linea&quot;.Modo.Auto</span>, <span class='mono'>&quot;DB_Linea&quot;.Modo.Ciclo_Marcha</span>, <span class='mono'>&quot;DB_Linea&quot;.Modo.Fin_Ciclo</span>, <span class='mono'>&quot;DB_Linea&quot;.Modo.Rearme_Pendiente</span>, <span class='mono'>&quot;DB_Linea&quot;.Modo.Parada_Seguridad</span>, <span class='mono'>&quot;DB_Linea&quot;.Emergencia.Hay_Causa</span>, <span class='mono'>&quot;DB_Linea&quot;.Emergencia.Memo_Sirena</span>, <span class='mono'>&quot;DB_Linea&quot;.Emergencia.Memo_Baliza</span>, <span class='mono'>&quot;VS_Valvula_Seguridad&quot;</span>, <span class='mono'>&quot;Sirena&quot;</span> y <span class='mono'>&quot;Baliza_Naranja&quot;</span>.</li><li>Pulsa <b>Observar todo</b> (las gafas) cuando el PLC esté en RUN.</li></ol><h4>En PLCSIM: tabla SIM</h4><ol class='acc'><li>Compila y carga como en la Parte 1.</li><li>En la tabla SIM añade <span class='mono'>&quot;SETA_Emergencia&quot;</span>, <span class='mono'>&quot;PB_Paro&quot;</span>, <span class='mono'>&quot;SEL_Auto&quot;</span>, <span class='mono'>&quot;PB_Marcha&quot;</span>, <span class='mono'>&quot;PB_Rearme&quot;</span>, <span class='mono'>&quot;AI_Nivel_Tanque&quot;</span>.</li></ol><div class="ojo"><b>Ojo</b> PLCSIM arranca con todas las entradas a 0. Para el PLC eso es <b>seta pulsada, PARO pulsado y MANUAL</b>, porque la seta y el PARO son NC. Así que lo primero que verás es la sirena sonando: es lo correcto.</div><div class="tip"><b>Truco</b> Para simular que pulsas un botón en la tabla SIM, pon su valor a 1 y enseguida otra vez a 0. En PARO es al revés, porque es NC: de 1 a 0 y otra vez a 1.</div></div></section><section class="paso" id="p-pruebas"><div class="pnum">12</div><div class="pbody"><h3>Las 13 pruebas de FC2</h3><p>Hazlas en orden. Cada fila parte de cómo quedó la anterior.</p><div class="tw"><table class="vt"><thead><tr><th>#</th><th>Qué haces</th><th>Qué debes ver</th></tr></thead><tbody><tr><td>0</td><td>Nada: acabas de cargar</td><td>Sirena = 1 · Baliza parpadea · Rearme_Pendiente = 1 · VS = 0</td></tr><tr><td>1</td><td>SETA = 1 · PARO = 1 · SEL_Auto = 1 · AI_Nivel_Tanque = 13824</td><td>Hay_Causa = 0 · Rearme_Pendiente = 1 · la sirena sigue sonando · VS = 0</td></tr><tr><td>2</td><td>Pulsa REARME</td><td>Rearme_Pendiente = 0 · Parada = 0 · Sirena = 0 · Baliza = 0 · <b>VS = 1</b></td></tr><tr><td>3</td><td>Pulsa MARCHA</td><td>Ciclo_Marcha = 1</td></tr><tr><td>4</td><td>Pulsa PARO (1 → 0 → 1)</td><td>Ciclo_Marcha = 0 enseguida, porque no hay botellas en la línea</td></tr><tr><td>5</td><td>Pulsa MARCHA y luego pon SETA = 0</td><td>Sirena = 1 · Baliza parpadea · Ciclo_Marcha = 0 · VS = 0</td></tr><tr><td>6</td><td>Con la seta aún a 0, pulsa REARME</td><td>Sirena = 0 · la baliza <b>sigue</b> · Rearme_Pendiente = 1</td></tr><tr><td>7</td><td>SETA = 1 y pulsa REARME</td><td>Todo limpio · VS = 1 · Baliza = 0</td></tr><tr><td>8</td><td>SEL_Auto = 0</td><td>Parada = 1 · VS = 0 · <b>sin</b> sirena ni baliza</td></tr><tr><td>9</td><td>SEL_Auto = 1 y pulsa MARCHA sin rearmar</td><td>No arranca: Rearme_Pendiente = 1. Pulsa REARME y ya puedes</td></tr><tr><td>10</td><td>AI_Nivel_Tanque = 27400</td><td>Sirena = 1 · Baliza parpadea · VS = 0</td></tr><tr><td>11</td><td>AI_Nivel_Tanque = 13824 y pulsa REARME</td><td>Todo limpio · VS = 1</td></tr><tr><td>12</td><td>PB_Prueba_Lamparas = 1</td><td>Baliza_Naranja = 1 fija mientras lo mantengas</td></tr></tbody></table></div><div class="tip"><b>Truco</b> Si una prueba falla, abre FC2 y pulsa <b>Activar/desactivar observación</b> (las gafas del editor). Verás en verde por dónde pasa la corriente en cada segmento y encontrarás el fallo enseguida.</div></div></section>
+  <section class="sig">
+    <h2>Siguiente: Parte 3</h2>
+    <p>FC3 · Tanque: la bomba arranca por debajo del 25 % y para al 90 %, el interruptor de prueba del 99 % y las alarmas A101 a A104.</p>
+  </section>
+  <footer>Generado desde herramientas/guia_parte2.py · Los dibujos KOP salen de herramientas/kop.py</footer>
+</div>
+<script>
+document.querySelectorAll('button.copiar').forEach(function(b){
+  b.addEventListener('click',function(ev){
+    ev.preventDefault();
+    var pre=document.getElementById(b.dataset.copiar);
+    var ok=function(){b.textContent='Copiado';setTimeout(function(){b.textContent='Copiar';},1500);};
+    var fallo=function(){var r=document.createRange();r.selectNodeContents(pre);var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Seleccionado: Ctrl+C';};
+    try{navigator.clipboard.writeText(pre.textContent).then(ok,fallo);}catch(err){fallo();}
+  });
+});
+</script>
+
+</body>
+</html>
