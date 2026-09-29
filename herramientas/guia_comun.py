@@ -29,14 +29,16 @@ class Guia:
         return (f'<section class="paso" id="{id_}"><div class="pnum">{n}</div>'
                 f'<div class="pbody"><h3>{titulo}</h3>{cuerpo}</div></section>')
 
-    def pagina(self, num, subtitulo, partes, siguiente, fichero_py):
-        """partes: [(letra, título, [html de pasos])]; siguiente: (título, html)."""
+    def pagina(self, num, subtitulo, partes, siguiente, fichero_py, titulo_tag=None, cabecera=None):
+        """partes: [(letra, título, [html de pasos]) o (letra, título, [pasos], intro)]; siguiente: (título, html)."""
+        partes = [p if len(p) == 4 else (*p, "") for p in partes]
         cuerpo = ""
-        for letra, titulo, pasos in partes:
+        for letra, titulo, pasos, intro in partes:
             cuerpo += (f'<h2 class="parte" id="parte-{letra}"><span>Parte {letra}</span> {titulo}</h2>'
+                       + (f'<p class="intro">{intro}</p>' if intro else "")
                        + "".join(pasos))
         indice, n = "", 0
-        for letra, titulo, _ in partes:
+        for letra, titulo, _, _ in partes:
             items = ""
             for id_, t, p in self.pasos:
                 if p == letra:
@@ -48,7 +50,9 @@ class Guia:
             with open(os.path.join(os.path.dirname(__file__), nombre), encoding="utf-8") as fh:
                 css += fh.read()
         sig_t, sig_html = siguiente
-        return f"""<title>Guía TIA Parte {num}</title>
+        titulo_tag = titulo_tag or f"Guía TIA Parte {num}"
+        cabecera = cabecera or f"Parte {num} <span>/ {subtitulo}</span>"
+        return f"""<title>{titulo_tag}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -58,7 +62,7 @@ class Guia:
 <div class="wrap">
   <header class="top">
     <div class="eyebrow">TFC · Línea de llenado · Guía paso a paso</div>
-    <h1>Parte {num} <span>/ {subtitulo}</span></h1>
+    <h1>{cabecera}</h1>
     <div class="meta">
       <span>TIA Portal <b>V15</b></span><span>S7-PLCSIM <b>V15</b></span>
       <span><b>{len(self.pasos)}</b> pasos</span><span>Tabla de variables <b>{e(D.REVISION)}</b></span>
@@ -150,3 +154,116 @@ def leer_fuente(nombre):
 def m(txt):
     """Texto en monoespaciado (nombres de variables dentro de un párrafo)."""
     return f"<span class='mono'>{e(txt)}</span>"
+
+
+class Segmentos:
+    """Numera los segmentos de un bloque: S = Segmentos(); S("título", dibujo, "texto")."""
+
+    def __init__(self):
+        self.n = 0
+
+    def __call__(self, titulo, dibujo, texto=""):
+        self.n += 1
+        return seg(self.n, titulo, dibujo, texto)
+
+
+def crear_bloque(clase, nombre, numero, temps=None, extra=()):
+    """Pasos para crear un bloque KOP y, si hace falta, sus variables Temp."""
+    pasos = [f"{ruta('PLC_Linea', 'Bloques de programa')} › doble clic en <b>Agregar nuevo bloque</b>.",
+             f"Elige <b>{clase}</b>. Nombre: {m(nombre)}. Lenguaje: <b>KOP</b>. Número: <b>manual</b>, {m(str(numero))}. Aceptar."]
+    pasos += list(extra)
+    html_ = lista(*pasos)
+    if temps:
+        html_ += ("<p>En la interfaz del bloque (arriba del editor), sección <b>Temp</b>, añade:</p>"
+                  + interfaz([("Temp", n, t, x) for n, t, x in temps]))
+    return html_
+
+
+# ---------------------------------------------------------------------------
+# Atajos para describir segmentos KOP
+# ---------------------------------------------------------------------------
+from kop import bobina, caja, comparar, contacto, segmento  # noqa: E402
+
+HMI = '"DB_HMI".Manual.'
+ZON = '"DB_Linea".Zonas.'
+TAP = '"DB_Linea".Taponado.'
+REC = '"DB_Linea".Rechazo.'
+CLA = '"DB_Linea".Clasif.'
+CAJ = '"DB_Linea".Cajas.'
+ALM = '"DB_Linea".Alarmas.'
+ROJ = '"DB_Linea".Rojo_Memo.'
+PRO = '"DB_Linea".Produccion.'
+GEN = '"DB_Linea".Generador.'
+TIM = '"DB_Tiempos".'
+
+
+def g(nombre):
+    """Variable de la tabla de variables: g('PB_Marcha') -> "PB_Marcha"."""
+    return f'"{nombre}"'
+
+
+def bot(idx, campo):
+    """Campo de una botella del FIFO: bot('Idx_Z1', 'Mala')."""
+    if idx.isdigit():
+        return f'"DB_FIFO".Botella[{idx}].{campo}'
+    return f'"DB_FIFO".Botella["DB_FIFO".{idx}].{campo}'
+
+
+def c(op):
+    return contacto(op)
+
+
+def nc(op):
+    return contacto(op, "|/|")
+
+
+def pos(op, memoria):
+    return contacto(op, "|P|", memoria)
+
+
+def neg(op, memoria):
+    return contacto(op, "|N|", memoria)
+
+
+def cmp_(op1, signo, op2, tipo):
+    return comparar(op1, signo, op2, tipo)
+
+
+def b(op):
+    return bobina(op)
+
+
+def S(op):
+    return bobina(op, "(S)")
+
+
+def R(op):
+    return bobina(op, "(R)")
+
+
+def mv(valor, tipo, destinos):
+    return caja("MOVE", tipo, [(valor, "IN")], [(f"OUT{i + 1}", d) for i, d in enumerate(destinos)])
+
+
+def mat(op, tipo, in1, in2, out):
+    return caja(op, tipo, [(in1, "IN1"), (in2, "IN2")], [("OUT", out)])
+
+
+def ton_(inst, pt, q):
+    return caja("TON", "Time", [(pt, "PT")], [("ET", "")], TIM + inst, "IN", "Q", q)
+
+
+def tp_(inst, pt, q):
+    return caja("TP", "Time", [(pt, "PT")], [("ET", "")], TIM + inst, "IN", "Q", q)
+
+
+def ctu_(inst, reset, pv, cv):
+    return caja("CTU", "Int", [(reset, "R"), (pv, "PV")], [("CV", cv)], TIM + inst, "CU", "Q", "")
+
+
+def llamada(fc):
+    return caja(f'"{fc}"', "", [], [])
+
+
+def kop(salida, paralelo=None, serie=None):
+    return segmento(salida, paralelo=paralelo, serie=serie)

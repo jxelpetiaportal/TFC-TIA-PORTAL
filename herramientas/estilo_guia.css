@@ -41,3 +41,4 @@ section.sig{margin-top:48px;padding:18px 20px;border:1px solid var(--rule);borde
 section.sig h2{color:var(--accent)}
 section.sig p{margin:0;max-width:80ch}
 @media (max-width:560px){section.paso{grid-template-columns:34px minmax(0,1fr);gap:0 10px}.pnum{font-size:26px}}
+p.intro{max-width:80ch;margin:8px 0 4px;color:var(--muted);font-size:15px}

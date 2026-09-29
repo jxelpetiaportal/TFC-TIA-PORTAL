@@ -1,0 +1,28 @@
+DATA_BLOCK "DB_HMI"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+NON_RETAIN
+   VAR 
+      Manual : Struct
+         C12 : Bool;   // Mover cintas C1 y C2 mientras se mantenga pulsado.
+         C3 : Bool;   // Mover cinta C3.
+         C4 : Bool;   // Mover cinta C4.
+         C5_05L : Bool;   // Mover C5 hacia la caja de 0,5 L.
+         C5_2L : Bool;   // Mover C5 hacia la caja de 2 L.
+         TAP01_Bajar : Bool;   // Bajar el cabezal de TAP-01.
+         Empujador : Bool;   // Avanzar el empujador.
+         Retirar_Malas : Bool;   // Retirar la caja de malas.
+         Reponer_Malas : Bool;   // Poner caja de malas nueva.
+         Retirar_05L : Bool;   // Retirar la caja de 0,5 L.
+         Reponer_05L : Bool;   // Poner caja de 0,5 L nueva.
+         Retirar_2L : Bool;   // Retirar la caja de 2 L.
+         Reponer_2L : Bool;   // Poner caja de 2 L nueva.
+      END_STRUCT;
+      Ordenes : Struct
+         Reset_Produccion : Bool;   // Pone a 0 los contadores de produccion.
+      END_STRUCT;
+   END_VAR
+
+BEGIN
+
+END_DATA_BLOCK

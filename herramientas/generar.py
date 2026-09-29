@@ -106,6 +106,18 @@ def generar_fuentes(carpeta):
     txt += "   END_VAR\n\nBEGIN\n\nEND_DATA_BLOCK\n"
     fuentes["04_DB_Tiempos.db"] = txt
 
+    txt = 'DATA_BLOCK "DB_HMI"\n{ S7_Optimized_Access := \'TRUE\' }\nVERSION : 0.1\nNON_RETAIN\n   VAR \n'
+    grupo = None
+    for g, n, t, x in D.DB_HMI:
+        if g != grupo:
+            if grupo:
+                txt += "      END_STRUCT;\n"
+            txt += f"      {g} : Struct\n"
+            grupo = g
+        txt += _var(n, t, "", x, "         ")
+    txt += "      END_STRUCT;\n   END_VAR\n\nBEGIN\n\nEND_DATA_BLOCK\n"
+    fuentes["05_DB_HMI.db"] = txt
+
     for nombre, contenido in fuentes.items():
         with open(os.path.join(carpeta, nombre), "w", encoding="ascii", newline="\r\n") as fh:
             fh.write(contenido)
@@ -298,19 +310,24 @@ def construir_html():
         "<div class='fifo'>"
         "<ol class='steps'>"
         "<li><b>Emisión.</b> Sale una botella: se guarda en <span class='mono'>Botella[Ptr_Entrada]</span> con "
-        "<span class='mono'>Activa = 1</span> y la hora (<span class='mono'>T_Emision</span>). El puntero avanza.</li>"
+        "<span class='mono'>Activa = 1</span> y la hora (<span class='mono'>T_Emision</span>). "
+        "<span class='mono'>Idx_Z1</span> apunta a ella y el puntero de entrada avanza (0→1→2→3→0).</li>"
         "<li><b>Detección.</b> Los sensores de altura escriben <span class='mono'>Es_2L</span> en "
-        "<span class='mono'>Botella[Ptr_Deteccion]</span>.</li>"
+        "<span class='mono'>Botella[Idx_Z1]</span>.</li>"
         "<li><b>Llenado.</b> Lee el tipo para calcular la consigna y escribe <span class='mono'>Mala</span> y "
-        "<span class='mono'>Volumen_L</span> en <span class='mono'>Botella[Ptr_Llenado]</span>.</li>"
-        "<li><b>Rechazo.</b> Lee <span class='mono'>Mala</span> de <span class='mono'>Botella[Ptr_Rechazo]</span>. "
-        "Si es mala, la empuja y la borra (<span class='mono'>Activa = 0</span>).</li>"
-        "<li><b>Clasificación.</b> La buena pasa a C5, se lee su tipo y, al caer en su caja, se borra.</li>"
+        "<span class='mono'>Volumen_L</span> en <span class='mono'>Botella[Idx_Z1]</span>.</li>"
+        "<li><b>Paso de zona.</b> Cuando la botella llega a la zona siguiente se copia su posición: "
+        "<span class='mono'>Idx_Z2 := Idx_Z1</span>, <span class='mono'>Idx_Z3 := Idx_Z2</span>…</li>"
+        "<li><b>Salida.</b> Al caer en cualquier caja se borra (<span class='mono'>Activa = 0</span>) y "
+        "<span class='mono'>N_Botellas</span> baja en 1.</li>"
         "</ol>"
-        "<p class='note'>Cada estación tiene su propio puntero porque las botellas nunca se adelantan. "
-        "Una botella nueva solo se emite si <span class='mono'>N_Botellas &lt; Max_Botellas</span>, ha pasado "
-        "<span class='mono'>T_Espera_Emision</span> y la posición <span class='mono'>Botella[Ptr_Entrada]</span> "
-        "está libre.</p></div>")
+        "<p class='note'>Una botella nueva solo se emite si la zona 1 está libre, <span class='mono'>N_Botellas &lt; "
+        "Max_Botellas</span>, ha pasado <span class='mono'>T_Espera_Emision</span> y la posición "
+        "<span class='mono'>Botella[Ptr_Entrada]</span> está libre. Con la parada de seguridad el FIFO se vacía.</p></div>")
+
+    hmi = tabla(["Variable", "Tipo", "Qué es"],
+                [f"<tr><td class='nm'>{e(g)}.{e(n)}</td><td class='ty'>{e(t)}</td><td>{e(x)}</td></tr>"
+                 for g, n, t, x in D.DB_HMI])
 
     tmp = tabla(["Instancia", "Tipo", "Tiempo / PV", "Fase", "Para qué"],
                 [f"<tr><td class='nm'>{e(n)}</td><td class='ty'>{e(t)}</td><td class='mono'>{e(p)}</td>"
@@ -344,7 +361,7 @@ def construir_html():
 
     nav = [("hw", "Hardware"), ("esquema", "Esquema"), ("di", "Entradas"), ("dq", "Salidas"),
            ("lamparas", "Lámparas"), ("an", "Analógicas"), ("marcas", "Marcas"), ("db", "DB_Linea"),
-           ("fifo", "FIFO"), ("tiempos", "Tiempos"), ("alarmas", "Alarmas"), ("bloques", "Bloques"),
+           ("fifo", "FIFO"), ("tiempos", "Tiempos"), ("dbhmi", "DB_HMI"), ("alarmas", "Alarmas"), ("bloques", "Bloques"),
            ("decisiones", "Decisiones")]
     nav_html = "".join(f"<a href='#{i}'>{t}</a>" for i, t in nav)
 
@@ -369,6 +386,8 @@ def construir_html():
                 "<h3>UDT_Botella</h3>" + udt + "<h3>DB_FIFO</h3>" + fifo + "<h3>Cómo se recorre</h3>" + fifo_txt),
         seccion("tiempos", "DB3 · DB_Tiempos",
                 "Temporizadores y contadores IEC en un DB global, sin mezclarlos dentro de las FC.", tmp),
+        seccion("dbhmi", "DB4 · DB_HMI",
+                "Órdenes que da la pantalla. Solo actúan en MANUAL y con la seta sin pulsar.", hmi),
         seccion("alarmas", "Alarmas por fase", "Cada fase tiene lámpara verde, naranja y roja.",
                 leyenda + "<h3>Significado del verde</h3>" + ver + "<h3>Lista de alarmas</h3>" + al),
         seccion("bloques", "Estructura de bloques", "Orden de llamada dentro del OB1: de FC1 a FC10.", bloques),

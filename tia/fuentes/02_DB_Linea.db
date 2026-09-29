@@ -9,7 +9,8 @@ NON_RETAIN
          Fin_Ciclo : Bool := FALSE;   // Se pulso PARO. No se generan mas botellas; las de la linea terminan.
          Linea_Vacia : Bool := TRUE;   // No queda ninguna botella en la linea (FIFO vacio).
          Rearme_Pendiente : Bool := TRUE;   // Se activa con cualquier causa y solo se borra con REARME cuando ya no queda ninguna. Arranca a 1 al encender la CPU.
-         Parada_Seguridad : Bool := TRUE;   // Resumen: hay alguna emergencia activa o memorizada. Para todo y cierra la valvula de seguridad.
+         Parada_Seguridad : Bool := TRUE;   // Hay causa o falta el rearme. Todas las FC lo miran: si vale 1, nada se mueve en automatico.
+         Manual_OK : Bool := FALSE;   // Selector en MANUAL y seta sin pulsar: se permiten los movimientos manuales desde la HMI.
       END_STRUCT;
       Emergencia : Struct
          Seta : Bool := FALSE;   // Causa activa ahora: seta pulsada.
@@ -22,12 +23,20 @@ NON_RETAIN
          Memo_Baliza : Bool := FALSE;   // Baliza parpadeando: desde que aparece una emergencia hasta que se completa el rearme.
       END_STRUCT;
       Flancos : Struct
-         Marcha_FM : Bool := FALSE;   // Memoria de flanco de PB_Marcha. No se usa para nada mas.
+         Marcha_FM : Bool := FALSE;   // Memoria de flanco de PB_Marcha.
          Rearme_FM : Bool := FALSE;   // Memoria de flanco de PB_Rearme.
          Seta_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Seta.
          Nivel99_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Nivel_99.
          T40_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Tiempo_40s.
          Fallo_FM : Bool := FALSE;   // Memoria de flanco de Emergencia.Fallo_Equipo.
+         Bajo_FM : Bool := FALSE;   // Memoria de flanco (bajada) de S_Botella_Bajo.
+         Llenado_FM : Bool := FALSE;   // Memoria de flanco de S_Pos_Llenado.
+         Taponado_FM : Bool := FALSE;   // Memoria de flanco de S_Pos_Taponado.
+         Rechazo_FM : Bool := FALSE;   // Memoria de flanco de S_Pos_Rechazo.
+         Transv_FM : Bool := FALSE;   // Memoria de flanco de S_Entrada_Transversal.
+         Caida_Malas_FM : Bool := FALSE;   // Memoria de flanco de S_Caja_Malas_Entrada.
+         Caja05_FM : Bool := FALSE;   // Memoria de flanco de S_Caja_05L_Entrada.
+         Caja2_FM : Bool := FALSE;   // Memoria de flanco de S_Caja_2L_Entrada.
          Marcha_Pulso : Bool := FALSE;   // Vale 1 durante un solo ciclo al pulsar MARCHA.
          Rearme_Pulso : Bool := FALSE;   // Vale 1 durante un solo ciclo al pulsar REARME.
       END_STRUCT;
@@ -36,26 +45,102 @@ NON_RETAIN
          Nivel_25 : Bool := FALSE;   // Sensor 25 % usado por el programa. Viene de I3.3 o, en simulacion, de Nivel_Pct >= 25.
          Nivel_90 : Bool := FALSE;   // Sensor 90 % usado por el programa (I3.4 o Nivel_Pct >= 90).
          Nivel_99 : Bool := FALSE;   // Sensor 99 % usado por el programa (I3.5 o Nivel_Pct >= 99).
-         Bomba_Marcha : Bool := FALSE;   // Bomba pedida: SET por debajo del 25 %, RESET al 90 % o con emergencia.
-         Aviso_Nivel_Bajo : Bool := FALSE;   // Nivel por debajo del 25 %: el llenado de botellas espera (naranja).
+         Bomba_Marcha : Bool := FALSE;   // Bomba pedida: SET por debajo del 25 %, RESET al 90 % o con parada de seguridad.
+      END_STRUCT;
+      Zonas : Struct
+         Z1 : Bool := FALSE;   // Zona 1 ocupada: cintas C1 + C2 (deteccion y llenado).
+         Z2 : Bool := FALSE;   // Zona 2 ocupada: cinta C3 (taponado).
+         Z3 : Bool := FALSE;   // Zona 3 ocupada: cinta C4 (rechazo).
+         Z4 : Bool := FALSE;   // Zona 4 ocupada: cinta transversal C5.
+         Z1_Entrega : Bool := FALSE;   // La botella de Z1 esta llena y Z2 libre: pasa a C3.
+         Z2_Entrega : Bool := FALSE;   // La botella de Z2 esta taponada y Z3 libre: pasa a C4.
+         Z3_Entrega : Bool := FALSE;   // La botella de Z3 es buena, Z4 libre y su caja lista: pasa a C5.
+         C12_Auto : Bool := FALSE;   // Peticion automatica de las cintas C1 y C2.
+         C3_Auto : Bool := FALSE;   // Peticion automatica de la cinta C3.
+         C4_Auto : Bool := FALSE;   // Peticion automatica de la cinta C4.
+         C5_Auto : Bool := FALSE;   // Peticion automatica de la cinta C5.
+         Dir_2L : Bool := FALSE;   // Sentido de C5: 1 = hacia la caja de 2 L, 0 = hacia la de 0,5 L.
+         Caja_OK_Z3 : Bool := FALSE;   // La caja que corresponde a la botella de Z3 esta puesta y no se esta cambiando.
+      END_STRUCT;
+      Generador : Struct
+         Peticion : Bool := FALSE;   // Vale 1 un solo ciclo: se emite una botella nueva.
       END_STRUCT;
       Llenado : Struct
          Caudal_Lmin : Real := 0.0;   // Caudal instantaneo en l/min (desde IW66).
          Volumen_L : Real := 0.0;   // Litros que han entrado en la botella actual.
          Consigna_L : Real := 0.0;   // Litros a alcanzar: 90 % de 0,5 L = 0,45 L - 90 % de 2 L = 1,8 L.
-         En_Curso : Bool := FALSE;   // Valvula de llenado abierta, sumando litros.
+         T_Max : Time := T#0ms;   // Tiempo maximo de llenado de la botella actual (segun su tipo).
+         Inicio : Bool := FALSE;   // Vale 1 un ciclo: la botella acaba de llegar a la llenadora.
+         En_Curso : Bool := FALSE;   // Llenando: se suman litros.
+         Hecho : Bool := FALSE;   // La botella de Z1 ya esta llena (buena o mala).
+         Fin_Bueno : Bool := FALSE;   // Vale 1 un ciclo: se alcanzo la consigna.
+         Fin_Malo : Bool := FALSE;   // Vale 1 un ciclo: se acabo el tiempo sin llegar a la consigna.
+         Valvula : Bool := FALSE;   // Valvula de llenado abierta.
          Malas_Seguidas : Int := 0;   // Botellas malas consecutivas. 3 seguidas = rojo A303.
       END_STRUCT;
-      Generador : Struct
-         Peticion : Bool := FALSE;   // Se cumplen las condiciones para pedir una botella nueva.
+      Taponado : Struct
+         Arriba : Bool := FALSE;   // Cabezal arriba (I2.0 o simulado).
+         Abajo : Bool := FALSE;   // Cabezal abajo (I2.1 o simulado).
+         Ciclo : Bool := FALSE;   // TAP-01 poniendo un tapon.
+         Apretado : Bool := FALSE;   // Ya paso el tiempo de apriete: el cabezal sube.
+         Hecho : Bool := FALSE;   // La botella de Z2 ya tiene tapon.
+      END_STRUCT;
+      Rechazo : Struct
+         Empujando : Bool := FALSE;   // Secuencia del empujador en curso.
+         Avanzado : Bool := FALSE;   // El empujador ya llego delante: ahora retrocede.
+         Esperando_Caida : Bool := FALSE;   // Botella empujada, esperando verla caer en la caja.
+         Botella_Fuera : Bool := FALSE;   // Vale 1 un ciclo: la botella mala cayo en su caja.
+      END_STRUCT;
+      Clasif : Struct
+         Fin_05L : Bool := FALSE;   // Vale 1 un ciclo: una botella cayo en la caja de 0,5 L.
+         Fin_2L : Bool := FALSE;   // Vale 1 un ciclo: una botella cayo en la caja de 2 L.
       END_STRUCT;
       Cajas : Struct
          Cnt_Malas : Int := 0;   // Botellas en la caja de malas (0...20).
          Cnt_05L : Int := 0;   // Botellas en la caja de 0,5 L (0...6).
          Cnt_2L : Int := 0;   // Botellas en la caja de 2 L (0...6).
-         Cambiando_Malas : Bool := FALSE;   // Cambio de caja de malas en curso (naranja).
-         Cambiando_05L : Bool := FALSE;   // Cambio de caja de 0,5 L en curso (naranja).
-         Cambiando_2L : Bool := FALSE;   // Cambio de caja de 2 L en curso (naranja).
+         Llena_Malas : Bool := FALSE;   // Vale 1 un ciclo: la caja de malas se lleno.
+         Llena_05L : Bool := FALSE;   // Vale 1 un ciclo: la caja de 0,5 L se lleno.
+         Llena_2L : Bool := FALSE;   // Vale 1 un ciclo: la caja de 2 L se lleno.
+         Cambiando_Malas : Bool := FALSE;   // Cambio de caja de malas en curso (naranja A503).
+         Cambiando_05L : Bool := FALSE;   // Cambio de caja de 0,5 L en curso (naranja A601).
+         Cambiando_2L : Bool := FALSE;   // Cambio de caja de 2 L en curso (naranja A602).
+         Fin_Cambio_Malas : Bool := FALSE;   // Vale 1 un ciclo al terminar el cambio de la caja de malas.
+         Fin_Cambio_05L : Bool := FALSE;   // Vale 1 un ciclo al terminar el cambio de la caja de 0,5 L.
+         Fin_Cambio_2L : Bool := FALSE;   // Vale 1 un ciclo al terminar el cambio de la caja de 2 L.
+      END_STRUCT;
+      Alarmas : Struct
+         A101 : Bool := FALSE;   // Naranja - nivel por debajo del 25 %.
+         A102 : Bool := FALSE;   // Rojo - tanque al 99 %.
+         A103 : Bool := FALSE;   // Rojo - sensores de nivel incoherentes.
+         A104 : Bool := FALSE;   // Naranja - la bomba no llena el tanque.
+         A201 : Bool := FALSE;   // Rojo - sensor ALTO sin sensor BAJO.
+         A202 : Bool := FALSE;   // Rojo - la botella no llega a deteccion.
+         A301 : Bool := FALSE;   // Naranja - la ultima botella salio MALA.
+         A302 : Bool := FALSE;   // Naranja - llenado esperando nivel del tanque.
+         A303 : Bool := FALSE;   // Rojo - 3 botellas malas seguidas.
+         A401 : Bool := FALSE;   // Rojo - TAP-01 no baja.
+         A402 : Bool := FALSE;   // Rojo - TAP-01 no sube.
+         A501 : Bool := FALSE;   // Rojo - empujador no llega delante.
+         A502 : Bool := FALSE;   // Rojo - empujador no vuelve atras.
+         A503 : Bool := FALSE;   // Naranja - cambiando caja de malas.
+         A504 : Bool := FALSE;   // Rojo - caja de malas: falta o la botella no cae.
+         A601 : Bool := FALSE;   // Naranja - cambiando caja de 0,5 L.
+         A602 : Bool := FALSE;   // Naranja - cambiando caja de 2 L.
+         A603 : Bool := FALSE;   // Rojo - la botella no llega a su caja.
+         A604 : Bool := FALSE;   // Rojo - falta la caja de 0,5 L o de 2 L.
+         A701 : Bool := FALSE;   // Rojo - seta pulsada.
+         A702 : Bool := FALSE;   // Rojo - botella mas de 40 s.
+         A703 : Bool := FALSE;   // Naranja - modo MANUAL.
+         A704 : Bool := FALSE;   // Rojo - rearme pendiente.
+      END_STRUCT;
+      Rojo_Memo : Struct
+         F1 : Bool := FALSE;   // Hubo un fallo rojo en la fase 1. Se borra al completar el rearme.
+         F2 : Bool := FALSE;   // Idem fase 2.
+         F3 : Bool := FALSE;   // Idem fase 3.
+         F4 : Bool := FALSE;   // Idem fase 4.
+         F5 : Bool := FALSE;   // Idem fase 5.
+         F6 : Bool := FALSE;   // Idem fase 6.
       END_STRUCT;
       Reloj : Struct
          Base_100ms : DInt := 0;   // Se suma 1 cada 100 ms en el OB30. Sirve para medir el tiempo de cada botella (40 s = 400).
@@ -71,18 +156,19 @@ NON_RETAIN
          Total_Cajas_Malas : DInt := 0;   // Cajas de malas completadas.
       END_STRUCT;
       Param : Struct
-         Simulacion_FIO : Bool := TRUE;   // TRUE = niveles desde el nivel analogico (Factory I/O). FALSE = sensores reales I3.3-I3.5.
+         Simulacion_FIO : Bool := TRUE;   // TRUE = niveles y finales de TAP-01 simulados (Factory I/O). FALSE = sensores reales.
          Max_Botellas : Int := 3;   // Botellas a la vez en la linea (1 a 4).
-         T_Espera_Emision : Time := T#8s;   // Tiempo minimo entre dos botellas nuevas.
+         T_Espera_Emision : Time := T#3s;   // Espera desde que la zona 1 queda libre hasta emitir la siguiente botella.
          Limite_Botella_100ms : DInt := 400;   // Tiempo maximo de una botella en la linea: 400 x 100 ms = 40 s.
          Pct_Llenado : Real := 90.0;   // Porcentaje de llenado objetivo.
          Vol_Botella_05 : Real := 0.5;   // Capacidad botella pequena (L).
          Vol_Botella_2 : Real := 2.0;   // Capacidad botella grande (L).
          Caudal_Max_Lmin : Real := 10.0;   // Caudal que corresponde a 27648 en IW66. A calibrar con Factory I/O.
          Apertura_Llenado : Int := 13824;   // Apertura de la valvula de llenado: 13824 = 50 %.
-         T_Max_Llenado_05 : Time := T#6s;   // Si en este tiempo no se llega a 0,45 L, la botella es MALA.
-         T_Max_Llenado_2 : Time := T#10s;   // Si en este tiempo no se llega a 1,8 L, la botella es MALA.
+         T_Max_Llenado_05 : Time := T#5s;   // Si en este tiempo no se llega a 0,45 L, la botella es MALA.
+         T_Max_Llenado_2 : Time := T#15s;   // Si en este tiempo no se llega a 1,8 L, la botella es MALA.
          T_Taponado : Time := T#2s;   // Tiempo con el cabezal de TAP-01 abajo (apriete del tapon).
+         T_Sim_TAP01 : Time := T#1s;   // Solo simulacion: lo que tarda el cabezal de TAP-01 en subir o bajar.
          T_Max_Cilindro : Time := T#3s;   // Tiempo maximo de movimiento de TAP-01 y del empujador. Si se pasa: rojo.
          T_Cambio_Caja : Time := T#3s;   // Duracion del cambio de caja (retirar + poner nueva).
          Cap_Caja_Buenas : Int := 6;   // Botellas por caja de buenas.

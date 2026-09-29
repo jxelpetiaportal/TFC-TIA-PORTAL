@@ -8,17 +8,21 @@ NON_RETAIN
       T_Llega_Deteccion : TON_TIME;   // Generador: Botella emitida que no llega a los sensores de altura: rojo A202.
       T_Incoherencia_Alto : TON_TIME;   // Deteccion: Filtro para la alarma ALTO sin BAJO (A201).
       T_Max_Llenado : TON_TIME;   // Llenado: Tiempo maximo de llenado segun el tipo de botella.
+      T_Sim_TAP01_Abajo : TON_TIME;   // Taponado: Simulacion del final de carrera ABAJO de TAP-01.
+      T_Sim_TAP01_Arriba : TON_TIME;   // Taponado: Simulacion del final de carrera ARRIBA de TAP-01.
       T_TAP01_Apriete : TON_TIME;   // Taponado: Tiempo con el cabezal abajo.
-      T_TAP01_Superv : TON_TIME;   // Taponado: Supervision de bajada o subida del cabezal.
-      T_Empujador_Superv : TON_TIME;   // Rechazo: Supervision de avance o retroceso del empujador.
-      T_Caida_Malas : TON_TIME;   // Rechazo: La botella empujada no llega a la caja de malas: rojo.
-      T_Transversal : TON_TIME;   // Clasificacion: La botella en C5 no llega a su caja: rojo.
+      T_TAP01_Baja : TON_TIME;   // Taponado: Supervision de bajada del cabezal: rojo A401.
+      T_TAP01_Sube : TON_TIME;   // Taponado: Supervision de subida del cabezal: rojo A402.
+      T_Emp_Avanza : TON_TIME;   // Rechazo: Supervision de avance del empujador: rojo A501.
+      T_Emp_Retrocede : TON_TIME;   // Rechazo: Supervision de retroceso del empujador: rojo A502.
+      T_Caida_Malas : TON_TIME;   // Rechazo: La botella empujada no llega a la caja de malas: rojo A504.
+      T_Transversal : TON_TIME;   // Clasificacion: La botella en C5 no llega a su caja: rojo A603.
       T_Cambio_Malas : TON_TIME;   // Cajas: Secuencia de cambio de la caja de malas.
       T_Cambio_05L : TON_TIME;   // Cajas: Secuencia de cambio de la caja de 0,5 L.
       T_Cambio_2L : TON_TIME;   // Cajas: Secuencia de cambio de la caja de 2 L.
       T_Relleno_Tanque : TON_TIME;   // Tanque: Bomba en marcha sin llegar al 90 %: naranja A104.
       T_Incoherencia_Nivel : TON_TIME;   // Tanque: Filtro para la alarma de sensores de nivel incoherentes (A103).
-      C_Caja_Malas : CTU_INT;   // Cajas: Cuenta botellas en la caja de malas. Q = caja llena.
+      C_Caja_Malas : CTU_INT;   // Cajas: Cuenta botellas en la caja de malas.
       C_Caja_05L : CTU_INT;   // Cajas: Cuenta botellas en la caja de 0,5 L.
       C_Caja_2L : CTU_INT;   // Cajas: Cuenta botellas en la caja de 2 L.
    END_VAR

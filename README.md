@@ -11,8 +11,7 @@ llenado con caudalímetro, taponadora TAP-01, rechazo de botellas malas y clasif
 | Carpeta | Qué hay |
 |---|---|
 | `docs/01_Tabla_Variables.html` | Tabla de variables completa: E/S, analógicas, DBs, FIFO, temporizadores, alarmas por fase y esquema de la línea. Se abre con cualquier navegador. |
-| `docs/02_Guia_Parte1.html` | Guía paso a paso, parte 1: proyecto, hardware, variables, UDT/DB, OB30, OB100 y FC1 en KOP. |
-| `docs/03_Guia_Parte2.html` | Guía paso a paso, parte 2: FC2 · Modos y seguridad (20 segmentos y 13 pruebas). |
+| `docs/02_Guia_Completa.html` | Guía completa, todo a mano y en 18 partes: proyecto, variables, datos, los 12 bloques KOP segmento a segmento, pruebas en PLCSIM, Factory I/O y HMI. |
 | `tia/Variables_PLC.xlsx` | Variables PLC para importar en TIA Portal (Variables PLC → Importar). |
 | `tia/fuentes/` | Fuentes externas del UDT y los DB (Fuentes externas → Generar bloques a partir de la fuente). |
 | `herramientas/` | Scripts que generan todo lo anterior. Los datos están en `datos_variables.py` y los dibujos KOP salen de `kop.py`. |
@@ -22,17 +21,13 @@ Para regenerar después de cambiar algo:
 ```
 pip install openpyxl
 python3 herramientas/generar.py
-python3 herramientas/guia_parte1.py
-python3 herramientas/guia_parte2.py
+python3 herramientas/guia_completa.py
 ```
 
 ## Estado
 
-1. ✅ Tabla de variables (Rev. C: variables de FC2 añadidas)
-2. ✅ DBs y UDT (fuentes externas)
-3. 🔄 Bloques KOP, uno por uno
-   - ✅ OB30, OB100, FC1 · Entradas (guía parte 1)
-   - ✅ FC2 · Modos y seguridad (guía parte 2)
-   - ⏳ FC3 · Tanque → FC10 · Alarmas y lámparas
-4. ⏳ Escena de Factory I/O
-5. ⏳ Pantalla HMI
+1. ✅ Tabla de variables (Rev. D: diseño final de todos los bloques)
+2. ✅ DBs y UDT
+3. ✅ Guía completa: OB1, OB30, OB100 y FC1…FC10 en KOP (224 segmentos)
+4. ✅ Guía de la escena de Factory I/O y de la pantalla HMI
+5. ⏳ Montarlo en TIA Portal y probarlo en PLCSIM + Factory I/O
