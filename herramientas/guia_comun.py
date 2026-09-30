@@ -242,7 +242,8 @@ def R(op):
 
 
 def mv(valor, tipo, destinos):
-    return caja("MOVE", tipo, [(valor, "IN")], [(f"OUT{i + 1}", d) for i, d in enumerate(destinos)])
+    """MOVE: en TIA no tiene selector de tipo (lo toma de los operandos). 'tipo' solo documenta el código."""
+    return caja("MOVE", "", [(valor, "IN")], [(f"OUT{i + 1}", d) for i, d in enumerate(destinos)])
 
 
 def mat(op, tipo, in1, in2, out):

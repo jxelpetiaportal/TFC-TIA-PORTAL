@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Guía completa · Partes 1 a 5: proyecto, variables, datos, KOP, OB100 y OB30 (todo a mano)."""
 import datos_variables as D
-from guia_comun import (FIFO, FLA, LLE, MOD, PAR, S, Segmentos, b, c, crear_bloque, e, interfaz,  # noqa: F401
+from guia_comun import (FIFO, FLA, LLE, MOD, PAR, R, S, Segmentos, b, c, crear_bloque, e, g, interfaz,  # noqa: F401
                         kop, lista, m, mat, mv, ojo, ruta, tabla, tip)
 
 
@@ -196,7 +196,8 @@ def partes(G):
         ("<span class='mono'>──( )</span>", "Asignación (bobina)", "Barra de favoritos"),
         ("<span class='mono'>──(S)</span> / <span class='mono'>──(R)</span>", "Activar / desactivar salida (memoriza)", "Operaciones lógicas con bits"),
         ("<span class='mono'>──| &gt;= |──</span>", "Comparador. Arriba el valor 1, abajo el valor 2 y el tipo entre corchetes", "Comparación"),
-        ("Caja MOVE, ADD, SUB, MUL, DIV", "Mover y operar. Se elige el tipo en <span class='mono'>???</span>", "Transferencia · Matemáticas"),
+        ("Caja MOVE", "Copia IN en OUT1, OUT2… No tiene tipo: lo toma de las variables", "Transferencia"),
+        ("Caja ADD, SUB, MUL, DIV", "Operar. Se elige el tipo (Int, DInt, Real) en <span class='mono'>???</span>", "Matemáticas"),
         ("Caja NORM_X, SCALE_X", "Escalado de analógicas", "Conversión"),
         ("Caja TON, TP", "Temporizadores", "Temporizadores"),
         ("Caja CTU", "Contador ascendente", "Contadores"),
@@ -214,8 +215,11 @@ def partes(G):
         "<b>Rama en paralelo (OR)</b>: selecciona el punto de inicio, pulsa <b>Abrir rama</b> (flecha hacia abajo en favoritos), "
         "pon los contactos y arrastra el final de la rama hasta la línea principal.",
         "<b>Varias bobinas a la salida</b>: igual, abre una rama justo antes de la primera bobina y pon la segunda debajo.",
-        "<b>Caja</b>: búscala en el panel <b>Instrucciones</b> (derecha) y arrástrala. Haz clic en <span class='mono'>???</span> "
-        "para elegir el tipo (Int, Real, DInt, Bool, Time).",
+        "<b>Caja</b>: búscala en el panel <b>Instrucciones</b> (derecha) y arrástrala. En ADD, SUB, MUL, DIV, los comparadores "
+        "y el CTU haz clic en <span class='mono'>???</span> para elegir el tipo que indica el dibujo (Int, DInt, Real, Time). "
+        "<b>MOVE no tiene tipo</b>: rellena IN y OUT y TIA lo deduce de las variables.",
+        "<b>Escribir bits</b>: para poner un Bool a 1 o a 0 usamos bobinas <span class='mono'>(S)</span> y "
+        "<span class='mono'>(R)</span>, nunca MOVE.",
         "<b>Más salidas en un MOVE</b>: clic en la estrella amarilla junto a <span class='mono'>OUT1</span>.",
         "<b>Temporizador o contador</b>: al soltar la caja TON, TP o CTU, TIA abre <b>Opciones de llamada</b>. Pulsa "
         "<b>Cancelar</b>. Encima de la caja aparece <span class='mono'>&lt;???&gt;</span>: escribe ahí la instancia de "
@@ -234,16 +238,19 @@ def partes(G):
     ob100 = crear_bloque("Bloque de organización (OB) › Startup", "OB100_Arranque", 100) + (
         "<p>Se ejecuta una sola vez al pasar la CPU a RUN. Deja la línea parada, con la válvula cerrada, "
         "el FIFO vacío y esperando REARME.</p>"
-        + s("Arranque seguro: rearme pendiente", kop(mv("TRUE", "Bool", [MOD + "Rearme_Pendiente", MOD + "Parada_Seguridad"])),
-            "Con un MOVE de tipo Bool se escriben varios bits a la vez. Pegado a la barra se ejecuta siempre.")
-        + s("Arranque seguro: todo parado", kop(mv("FALSE", "Bool", ['"VS_Valvula_Seguridad"', LLE + "En_Curso",
-                                                                    MOD + "Ciclo_Marcha", MOD + "Fin_Ciclo"])))
+        + s("Arranque seguro: rearme pendiente", kop([S(MOD + "Rearme_Pendiente"), S(MOD + "Parada_Seguridad")],
+                                                      serie=[c(g("AlwaysTRUE"))]),
+            "<span class='mono'>AlwaysTRUE</span> es la marca de sistema M1.2: vale siempre 1, así que el segmento se "
+            "ejecuta siempre. Las dos bobinas en paralelo se hacen abriendo una rama antes de la primera.")
+        + s("Arranque seguro: todo parado", kop([R(g("VS_Valvula_Seguridad")), R(LLE + "En_Curso"),
+                                                R(MOD + "Ciclo_Marcha"), R(MOD + "Fin_Ciclo")], serie=[c(g("AlwaysTRUE"))]))
         + s("FIFO vacío: punteros a 0", kop(mv("0", "Int", [FIFO + "Ptr_Entrada", FIFO + "Idx_Z1", FIFO + "Idx_Z2",
                                                             FIFO + "Idx_Z3", FIFO + "Idx_Z4", FIFO + "N_Botellas"])))
         + s("FIFO vacío: primera botella con ID 1", kop(mv("1", "Int", [FIFO + "Siguiente_ID"])))
-        + s("FIFO vacío: posiciones libres", kop(mv("FALSE", "Bool", [f'"DB_FIFO".Botella[{i}].Activa' for i in range(4)])),
+        + s("FIFO vacío: posiciones libres", kop([R(f'"DB_FIFO".Botella[{i}].Activa') for i in range(4)],
+                                                 serie=[c(g("AlwaysTRUE"))]),
             "Así se escribe un campo de un elemento del array: <span class='mono'>Botella[2].Activa</span>.")
-        + s("Zonas vacías", kop(mv("FALSE", "Bool", [f'"DB_Linea".Zonas.Z{i}' for i in range(1, 5)])))
+        + s("Zonas vacías", kop([R(f'"DB_Linea".Zonas.Z{i}') for i in range(1, 5)], serie=[c(g("AlwaysTRUE"))]))
     )
     p5.append(paso("p-ob100", "OB100 · Arranque seguro", ob100, 5))
 

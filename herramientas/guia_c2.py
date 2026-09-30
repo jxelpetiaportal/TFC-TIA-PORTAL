@@ -247,10 +247,10 @@ def partes(G):
               "índice otra variable. Escríbelos tal cual. Si TIA los marcara en rojo, copia el índice a una variable Temp Int "
               "con un MOVE y usa <span class='mono'>Botella[#i]</span>."), 9))
     txt = (
-        s("Vaciar la línea en parada (1)", kop(mv("FALSE", "Bool", [f'"DB_FIFO".Botella[{i}].Activa' for i in range(4)]),
+        s("Vaciar la línea en parada (1)", kop([R(f'"DB_FIFO".Botella[{i}].Activa') for i in range(4)],
                                               serie=[c(MOD + "Parada_Seguridad")]),
           "Con la parada de seguridad se olvidan todas las botellas. Antes de REARME hay que retirarlas de las cintas.")
-        + s("Vaciar la línea en parada (2)", kop(mv("FALSE", "Bool", [ZON + f"Z{i}" for i in range(1, 5)]),
+        + s("Vaciar la línea en parada (2)", kop([R(ZON + f"Z{i}") for i in range(1, 5)],
                                                 serie=[c(MOD + "Parada_Seguridad")]))
         + s("Vaciar la línea en parada (3)", kop(mv("0", "Int", [FIFO + "N_Botellas", FIFO + "Ptr_Entrada"]),
                                                 serie=[c(MOD + "Parada_Seguridad")]))
@@ -270,10 +270,9 @@ def partes(G):
     )
     p.append(paso("fc4-peticion", "Segmentos 4 a 6 · Pedir una botella", txt, 9))
     txt = (
-        s("Alta en el FIFO: activa y zona 1 ocupada", kop(mv("TRUE", "Bool", [bot("Ptr_Entrada", "Activa"), ZON + "Z1"]),
+        s("Alta en el FIFO: activa y zona 1 ocupada", kop([S(bot("Ptr_Entrada", "Activa")), S(ZON + "Z1")],
                                                          serie=[c(GEN + "Peticion")]))
-        + s("Alta en el FIFO: datos a 0", kop(mv("FALSE", "Bool", [bot("Ptr_Entrada", x) for x in
-                                                                  ("Tipo_Leido", "Es_2L", "Llenada", "Mala")]),
+        + s("Alta en el FIFO: datos a 0", kop([R(bot("Ptr_Entrada", x)) for x in ("Tipo_Leido", "Es_2L", "Llenada", "Mala")],
                                              serie=[c(GEN + "Peticion")]))
         + s("Alta en el FIFO: número de botella", kop(mv(FIFO + "Siguiente_ID", "Int", [bot("Ptr_Entrada", "ID")]),
                                                      serie=[c(GEN + "Peticion")]))
