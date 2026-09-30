@@ -57,7 +57,9 @@ def partes(G):
         s("Sensor de nivel 25 %", nivel(25, "S_Tanque_25"),
           "<p>Rama de arriba: en simulación, el sensor se calcula comparando el nivel con 25.0. Rama de abajo: en una "
           "instalación real se copia el sensor I3.3. El resto del programa usa siempre "
-          "<span class='mono'>\"DB_Linea\".Tanque.Nivel_25</span>.</p>")
+          "<span class='mono'>\"DB_Linea\".Tanque.Nivel_25</span>.</p>"
+          "<p><b>Si TIA dice que un Real no concuerda con Bool en la bobina</b>: en DB_Linea, Nivel_25, Nivel_90 y Nivel_99 "
+          "se quedaron como Real (TIA copia el tipo de Nivel_Pct, la fila de arriba). Cámbialos a Bool y compila DB_Linea.</p>")
         + s("Sensor de nivel 90 %", nivel(90, "S_Tanque_90"))
         + s("Sensor de nivel 99 %", nivel(99, "S_Tanque_99"), "Este es el que dispara la emergencia del 99 %.")
         + tip("Haz el segmento 5, cópialo (Ctrl+C, Ctrl+V) y en la copia cambia solo el número y el sensor.")

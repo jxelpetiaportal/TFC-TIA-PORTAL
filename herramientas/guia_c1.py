@@ -96,7 +96,9 @@ def partes(G):
     ) + tip("En la dirección puedes escribir <span class='mono'>I0.0</span> sin el <span class='mono'>%</span>: TIA lo añade solo.")
         + tip("Para las lámparas, escribe la primera fila, selecciónala, y arrastra hacia abajo el cuadradito de la esquina "
               "inferior derecha de la celda: TIA crea las siguientes subiendo la dirección. Después solo corriges los nombres.")
-        + ojo("Las direcciones tienen que ser exactamente las de esta guía: Factory I/O se conectará a ellas."), 2))
+        + ojo("Las direcciones tienen que ser exactamente las de esta guía: Factory I/O se conectará a ellas.")
+        + ojo("En cada fila nueva TIA copia el tipo de la fila de arriba. Las analógicas son <span class='mono'>Int</span> y "
+              "todo lo demás <span class='mono'>Bool</span>: revísalo."), 2))
 
     p2.append(paso("p-var-di", f"Entradas digitales ({sum(1 for x in di if x[1])})",
                    "<p>Cuadro de mando (I0), sensores de la cinta (I1) y módulo DI16 (I2 e I3). Las reservas no se escriben.</p>"
@@ -167,7 +169,10 @@ def partes(G):
         "Para empezar el siguiente Struct, escribe en la primera fila vacía de abajo, al nivel de los Struct.",
         "En los Struct <span class='mono'>Produccion</span> y <span class='mono'>Param</span> marca la casilla "
         "<b>Remanencia</b>. En un DB optimizado se marca en el Struct entero.",
-    ) + ojo("Es el bloque más largo (unas 140 variables). Tómatelo con calma y compila al acabar cada Struct: "
+    ) + ojo("Al crear una fila nueva, TIA copia el <b>tipo de datos de la fila de arriba</b>. Por ejemplo, debajo de "
+            "<span class='mono'>Nivel_Pct</span> (Real) las filas <span class='mono'>Nivel_25</span>, <span class='mono'>Nivel_90</span> "
+            "y <span class='mono'>Nivel_99</span> salen como Real y deben ser Bool. Revisa la columna <b>Tipo de datos</b> de cada fila "
+            "con la tabla de la guía.") + ojo("Es el bloque más largo (unas 140 variables). Tómatelo con calma y compila al acabar cada Struct: "
             "así, si te equivocas, lo ves enseguida.")
     for gnom, filas in grupos:
         rem = " · <b>remanente</b>" if filas[0][4] else ""
