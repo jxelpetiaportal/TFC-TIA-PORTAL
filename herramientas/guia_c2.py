@@ -168,7 +168,18 @@ def partes(G):
         + s("PARO: pedir fin de ciclo", kop([S(MOD + "Fin_Ciclo")], serie=[nc(g("PB_Paro")), c(MOD + "Ciclo_Marcha")]),
             "PARO no para en seco: deja de pedir botellas y espera a que salgan las que hay.")
         + s("Parar el ciclo: fin de ciclo terminado o emergencia", kop([R(MOD + "Ciclo_Marcha"), R(MOD + "Fin_Ciclo")], paralelo=[
-            [c(MOD + "Fin_Ciclo"), c(MOD + "Linea_Vacia")], [c(MOD + "Parada_Seguridad")]]))
+            [c(MOD + "Fin_Ciclo"), c(MOD + "Linea_Vacia")], [c(MOD + "Parada_Seguridad")]]),
+            "<p><b>Cómo leerlo:</b> hay dos caminos para llegar a las bobinas. Línea de arriba: se pidió PARO "
+            "<b>y</b> ya no quedan botellas. Línea de abajo: hay parada de seguridad. Si se cumple cualquiera de las dos "
+            "(OR), se borran <span class='mono'>Ciclo_Marcha</span> y <span class='mono'>Fin_Ciclo</span>.</p>"
+            + lista("Pon en serie los contactos abiertos <span class='mono'>Fin_Ciclo</span> y <span class='mono'>Linea_Vacia</span>.",
+                    "Haz clic en la línea justo a la derecha de la barra de alimentación y pulsa <b>Abrir rama</b>. "
+                    "Pon en la rama nueva el contacto abierto <span class='mono'>Parada_Seguridad</span>.",
+                    "Arrastra el final de esa rama hasta la línea de arriba, justo después de <span class='mono'>Linea_Vacia</span> "
+                    "(el primer <span class='mono'>┬</span> del dibujo).",
+                    "Al final de la línea de arriba pon la bobina <span class='mono'>(R)</span> <span class='mono'>Ciclo_Marcha</span>.",
+                    "Haz clic en la línea justo antes de esa bobina, pulsa <b>Abrir rama</b> y pon debajo la bobina "
+                    "<span class='mono'>(R)</span> <span class='mono'>Fin_Ciclo</span> (el segundo <span class='mono'>┬</span>)."))
         + s("Válvula de seguridad del tanque", kop([b(g("VS_Valvula_Seguridad"))], serie=[c(MOD + "Auto"), nc(MOD + "Parada_Seguridad")]),
             "Abierta en AUTO sin parada de seguridad, aunque el ciclo esté parado: así el tanque mantiene su nivel.")
     )
