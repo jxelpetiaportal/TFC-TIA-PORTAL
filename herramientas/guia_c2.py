@@ -69,6 +69,10 @@ def partes(G):
     seg_tap = (
         "<p>Factory I/O no da finales de carrera para el cabezal de TAP-01. En simulación los fabricamos: el cabezal "
         "\"llega abajo\" 1 s después de mandarlo bajar y \"llega arriba\" 1 s después de mandarlo subir.</p>"
+        + tip("En la salida Q del TON: doble clic en los <span class='mono'>...</span> de la derecha de Q y escribe "
+              "<span class='mono'>Sim_Abajo</span>. TIA le pone el <span class='mono'>#</span> solo porque es una variable Temp "
+              "de este bloque. Comprueba en la interfaz que <span class='mono'>Sim_Abajo</span> y <span class='mono'>Sim_Arriba</span> "
+              "son <b>Bool</b>: al estar debajo de dos Real, TIA las crea como Real.")
         + s("TAP-01 simulado: llega abajo", kop(ton_("T_Sim_TAP01_Abajo", PAR + "T_Sim_TAP01", "#Sim_Abajo"),
                                               serie=[c(g("TAP01_Bajar"))]))
         + s("TAP-01 simulado: llega arriba", kop(ton_("T_Sim_TAP01_Arriba", PAR + "T_Sim_TAP01", "#Sim_Arriba"),

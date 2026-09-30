@@ -229,6 +229,12 @@ def partes(G):
         "<b>Temporizador o contador</b>: al soltar la caja TON, TP o CTU, TIA abre <b>Opciones de llamada</b>. Pulsa "
         "<b>Cancelar</b>. Encima de la caja aparece <span class='mono'>&lt;???&gt;</span>: escribe ahí la instancia de "
         "DB_Tiempos que indica el dibujo (por ejemplo <span class='mono'>\"DB_Tiempos\".T_Relleno_Tanque</span>).",
+        "<b>Variables locales (#)</b>: primero se declaran en la interfaz del bloque, sección <b>Temp</b> (si no ves la interfaz, "
+        "despliégala con la flecha que hay encima del editor). Luego, en el operando, escribe el nombre sin el "
+        "<span class='mono'>#</span>: TIA lo reconoce y lo añade solo.",
+        "<b>Salida Q o ET de un temporizador</b>: haz doble clic en los <span class='mono'>...</span> que hay a la derecha de "
+        "<span class='mono'>Q</span> y escribe la variable. También vale dejarlo vacío y poner una bobina con esa variable "
+        "pegada a la salida Q.",
         "<b>Título del segmento</b>: escríbelo siempre, el mismo que en la guía.",
     ) + tip("Cuando algo no funcione, abre el bloque y pulsa <b>Activar/desactivar observación</b> (las gafas). "
             "Verás en verde por dónde pasa la corriente."), 4))
