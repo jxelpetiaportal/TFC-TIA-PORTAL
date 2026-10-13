@@ -127,13 +127,29 @@ def partes(G):
                     [(e(x), f"<span class='mono'>DB_HMI.{gg}.{n}</span>", f"<span class='mono'>DB_HMI.{gg}.{n}</span>")
                      for gg, n, _t, x in D.DB_HMI if gg == "Manual"])
     p.append(paso("hmi-manual", "Imagen Manual", lista(
-        "Pon un texto arriba: <i>Solo con el selector en MANUAL y la seta sin pulsar</i>.",
-        "Pon un botón por cada orden de la tabla.",
-        f"En cada botón: {ruta('Eventos', 'Pulsar')} › <b>ActivarBit</b> con su variable, y {ruta('Eventos', 'Soltar')} › "
-        "<b>DesactivarBit</b> con la misma. Así el movimiento dura mientras mantienes el dedo.",
-        f"Selecciona todos los botones: {ruta('Animaciones', 'Visibilidad')}, variable {m('DB_Linea.Modo.Manual_OK')}, "
-        "visible de 1 a 1. Fuera de MANUAL desaparecen.",
-    ) + botones + ojo("Los enclavamientos están en el PLC (parte 11 a 13): aunque pulses, C3 no se mueve con TAP-01 abajo "
+        "Abre la imagen <span class='mono'>Manual</span>. Pon un texto arriba: <i>Solo con el selector en MANUAL y la seta sin pulsar</i>.",
+        "Desde <b>Herramientas › Elementos</b> (panel de la derecha) arrastra un <b>Botón</b>. En "
+        f"{ruta('Propiedades', 'Propiedades', 'General')} escribe su texto, por ejemplo <i>C1 + C2</i>.",
+        "Pon un botón por cada orden de la tabla de abajo.",
+    ) + "<h4>Cómo se ponen los eventos (en cada botón)</h4>" + lista(
+        "Selecciona el botón. Abajo, en la ventana de inspección, pulsa "
+        f"{ruta('Propiedades')} y luego la pestaña <b>Eventos</b> (está al lado de <b>Animaciones</b>).",
+        "A la izquierda sale la lista de eventos del botón: <b>Hacer clic</b>, <b>Pulsar</b>, <b>Soltar</b>, "
+        "<b>Activar</b>, <b>Desactivar</b> y <b>Cambio</b>. Solo usamos <b>Pulsar</b> y <b>Soltar</b>.",
+        "Haz clic en <b>Pulsar</b>. A la derecha aparece una tabla con <span class='mono'>&lt;Agregar función&gt;</span>: "
+        f"haz clic ahí y elige {ruta('Procesamiento de bits', 'ActivarBit')}.",
+        "Debajo de ActivarBit sale el parámetro <b>Variable (Entrada/salida)</b>. Pulsa el botón <b>…</b> y navega a "
+        f"{ruta('PLC_Linea', 'Bloques de programa', 'DB_HMI', 'Manual')}. Elige la variable del botón (por ejemplo "
+        "<span class='mono'>C12</span>) y pulsa el tic verde.",
+        "Ahora haz clic en <b>Soltar</b> y repite con la función <b>DesactivarBit</b> y <b>la misma variable</b>.",
+        "Resultado: mientras mantienes el dedo en el botón la variable vale 1 y el PLC mueve la cinta; al soltar vuelve a 0 y se para.",
+    ) + tip("Haz el primer botón completo, cópialo y pégalo 12 veces. En cada copia solo cambias el texto y la variable de "
+            "<b>Pulsar</b> y <b>Soltar</b>.") + "<h4>Que solo aparezcan en MANUAL</h4>" + lista(
+        f"Selecciona todos los botones a la vez (Ctrl + clic). En {ruta('Propiedades', 'Animaciones')} haz doble clic en "
+        "<b>Visualización › Agregar nueva animación › Visibilidad</b>.",
+        f"Variable: {m('DB_Linea.Modo.Manual_OK')}. Marca <b>Rango</b> de 1 a 1 y <b>Visible</b>.",
+        "Fuera de MANUAL, o con la seta pulsada, los botones desaparecen.",
+    ) + botones + ojo("Los enclavamientos están en el PLC (partes 11 a 13): aunque pulses, C3 no se mueve con TAP-01 abajo "
                       "ni C4 con el empujador fuera."), 18))
 
     alarmas = tabla(["Alarma", "Variable", "Color con valor 1"],
