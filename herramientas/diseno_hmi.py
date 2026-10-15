@@ -107,12 +107,21 @@ def imagen_inicio():
              nota="Rectángulo 24 × 24 con borde 1 px gris oscuro. Encima, dos Líneas gris oscuro de 2 px que forman una X: "
                   "de (36, 138) a (60, 162) y de (60, 138) a (36, 162)"),
         dict(t="text", x=76, y=142, w=104, h=18, txt="Válv. seguridad", size=12, color="tenue", obj=OBJ_TEXT),
-        dict(t="tank", x=40, y=184, w=100, h=170, obj=OBJ_RECT, nota="Rectángulo redondeado (radio 8), borde 2 px tenue"),
+        dict(t="tank", x=40, y=184, w=100, h=170, obj=OBJ_RECT,
+             nota="El contorno del tanque. Fondo: estilo transparente. Borde: 2 px, color tenue (96, 125, 139). "
+                  "Esquinas redondeadas: radio X 8 y radio Y 8"),
         dict(t="bar", x=44, y=188, w=92, h=162, var="DB_Linea.Tanque.Nivel_Pct", demo=62, fill="agua", obj=OBJ_BAR,
-             anim="Receta F · mín 0 · máx 100 · color de barra agua, fondo blanco"),
+             anim="Receta F · mín 0 · máx 100 · color de barra agua (64, 156, 214) · fondo blanco · sin borde · "
+                  "sin escala ni etiquetas · crece de abajo arriba",
+             nota="Va dentro del contorno, 4 px más pequeña por cada lado"),
+        dict(t="line", x=140, y=204, w=6, h=0, color="tenue", obj=("Línea", "Herramientas › Objetos básicos"),
+             nota="Marca del 90 %: de (140, 204) a (146, 204), 1 px, color tenue"),
+        dict(t="line", x=140, y=309, w=6, h=0, color="tenue", obj=("Línea", "Herramientas › Objetos básicos"),
+             nota="Marca del 25 %: de (140, 309) a (146, 309), 1 px, color tenue"),
         dict(t="text", x=144, y=198, w=40, h=14, txt="90 %", size=10, color="tenue", obj=OBJ_TEXT),
         dict(t="text", x=144, y=303, w=40, h=14, txt="25 %", size=10, color="tenue", obj=OBJ_TEXT),
-        io(40, 364, 100, 30, "DB_Linea.Tanque.Nivel_Pct", "999.9 %", "62.0 %", size=16),
+        io(40, 364, 100, 30, "DB_Linea.Tanque.Nivel_Pct", "999.9 (y el texto % en Unidad, o en un campo de texto al lado)",
+           "62.0 %", size=16),
     ]
     o += panel(196, 56, 596, 214, "LÍNEA")
     cintas = [("C1", 212, 150, "Cinta_C1_Entrada", True), ("C2", 366, 96, "Cinta_C2_Llenado", False),
@@ -337,9 +346,9 @@ def svg_objeto(o):
         return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="2" fill="{C["blanco"]}" stroke="{C["borde"]}"/>'
                 f'<rect x="{x}" y="{y}" width="{w * frac}" height="{h}" rx="2" fill="{C[o["fill"]]}"/>')
     if t == "tank":
-        return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="none" stroke="{C["tenue"]}" stroke-width="2"/>'
-                f'<line x1="{x + w}" y1="{y + 20}" x2="{x + w + 6}" y2="{y + 20}" stroke="{C["tenue"]}"/>'
-                f'<line x1="{x + w}" y1="{y + 125}" x2="{x + w + 6}" y2="{y + 125}" stroke="{C["tenue"]}"/>')
+        return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="none" stroke="{C["tenue"]}" stroke-width="2"/>'
+    if t == "line":
+        return f'<line x1="{x}" y1="{y}" x2="{x + w}" y2="{y + h}" stroke="{C[o.get("color", "tenue")]}" stroke-width="1"/>'
     if t == "pump":
         col = C["marcha"] if o.get("on") else C["apagado"]
         r = w / 2
