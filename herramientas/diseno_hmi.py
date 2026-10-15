@@ -58,7 +58,7 @@ OBJ_GRAF = ("Visor de gráficos", "Herramientas › Gráficos › Carpetas de gr
 
 
 def anim_color(var, on="marcha"):
-    return f"Apariencia · {var} · 0 = apagado, 1 = {on}"
+    return f"Receta B · variable {var} · valor 0 = apagado, valor 1 = {on}"
 
 
 def plantilla():
@@ -67,13 +67,13 @@ def plantilla():
         dict(t="rect", x=0, y=0, w=800, h=48, fill="cabecera", obj=OBJ_RECT, nota="Cabecera, sin borde"),
         dict(t="text", x=16, y=12, w=240, h=24, txt="LÍNEA DE LLENADO", size=16, bold=True, color="blanco", obj=OBJ_TEXT),
         dict(t="sym", x=500, y=10, w=196, h=28, var="DB_Linea.Modo.Estado", demo=1, obj=OBJ_SYM,
-             anim="Lista de textos «Estados» · Apariencia por valor (ver tabla de estados)"),
+             anim="Receta E (modo Salida, lista de textos «Estados») + Receta B con 6 valores (tabla de estados)"),
         dict(t="time", x=708, y=12, w=80, h=24, obj=OBJ_TIME, nota="Modo: hora del sistema, texto blanco"),
         dict(t="rect", x=0, y=424, w=800, h=56, fill="cabecera", obj=OBJ_RECT, nota="Barra de navegación"),
     ]
     for i, (nom, img) in enumerate([("INICIO", "Inicio"), ("MANUAL", "Manual"), ("ALARMAS", "Alarmas"), ("PRODUCCIÓN", "Produccion")]):
         o.append(dict(t="button", x=12 + i * 198, y=430, w=184, h=44, txt=nom, fill="boton", color="blanco", size=14,
-                      obj=OBJ_BTN, anim=f"Evento Hacer clic › ActivarImagen › {img}"))
+                      obj=OBJ_BTN, anim=f"Receta D · evento Hacer clic › ActivarImagen › {img}"))
     return o
 
 
@@ -89,7 +89,7 @@ def lamp(x, y, d, var, color_on, demo=0, nota=""):
 
 def io(x, y, w, h, var, fmt, demo, size=14, modo="Salida", color="acento", bold=True):
     return dict(t="io", x=x, y=y, w=w, h=h, var=var, demo=demo, size=size, color=color, bold=bold, obj=OBJ_IO,
-                anim=f"Modo {modo} · formato {fmt}")
+                anim=f"Receta E · modo {modo} · formato {fmt}")
 
 
 # --- INICIO -----------------------------------------------------------------
@@ -109,7 +109,7 @@ def imagen_inicio():
         dict(t="text", x=76, y=142, w=104, h=18, txt="Válv. seguridad", size=12, color="tenue", obj=OBJ_TEXT),
         dict(t="tank", x=40, y=184, w=100, h=170, obj=OBJ_RECT, nota="Rectángulo redondeado (radio 8), borde 2 px tenue"),
         dict(t="bar", x=44, y=188, w=92, h=162, var="DB_Linea.Tanque.Nivel_Pct", demo=62, fill="agua", obj=OBJ_BAR,
-             anim="Mín 0 · Máx 100 · sin escala · color de barra agua, fondo blanco"),
+             anim="Receta F · mín 0 · máx 100 · color de barra agua, fondo blanco"),
         dict(t="text", x=144, y=198, w=40, h=14, txt="90 %", size=10, color="tenue", obj=OBJ_TEXT),
         dict(t="text", x=144, y=303, w=40, h=14, txt="25 %", size=10, color="tenue", obj=OBJ_TEXT),
         io(40, 364, 100, 30, "DB_Linea.Tanque.Nivel_Pct", "999.9 %", "62.0 %", size=16),
@@ -122,7 +122,7 @@ def imagen_inicio():
         o.append(dict(t="text", x=x, y=198, w=w, h=14, txt=nom, size=11, color="tenue", align="c", obj=OBJ_TEXT))
     o += [
         dict(t="belt", x=702, y=92, w=18, h=172, on=True, vertical=True, var="Cinta_C5_Hacia_05L / _2L", obj=OBJ_RECT,
-             anim="Apariencia con Cinta_C5_Hacia_05L (y otro rectángulo encima con _2L, o un solo color si cualquiera vale 1)"),
+             anim="Receta B con Cinta_C5_Hacia_05L. Pon encima otro rectángulo igual con Receta B y Cinta_C5_Hacia_2L"),
         dict(t="text", x=682, y=270 - 20, w=16, h=14, txt="C5", size=11, color="tenue", obj=OBJ_TEXT),
         dict(t="text", x=212, y=154, w=80, h=16, txt="Entrada →", size=11, color="tenue", obj=OBJ_TEXT),
         # llenado
@@ -147,13 +147,13 @@ def imagen_inicio():
         dict(t="text", x=728, y=240, w=56, h=16, txt="2 L", size=11, color="tenue", align="c", obj=OBJ_TEXT),
         # botellas por zona
         dict(t="bottle", x=406, y=152, w=16, h=24, on=True, var="DB_Linea.Zonas.Z1", obj=OBJ_RECT,
-             anim="Visibilidad · DB_Linea.Zonas.Z1 · visible con 1"),
+             anim="Receta C · variable DB_Linea.Zonas.Z1 · visible con 1"),
         dict(t="bottle", x=506, y=152, w=16, h=24, on=True, var="DB_Linea.Zonas.Z2", obj=OBJ_RECT,
-             anim="Visibilidad · DB_Linea.Zonas.Z2 · visible con 1"),
+             anim="Receta C · variable DB_Linea.Zonas.Z2 · visible con 1"),
         dict(t="bottle", x=618, y=152 + 2, w=16, h=22, on=False, var="DB_Linea.Zonas.Z3", obj=OBJ_RECT,
-             anim="Visibilidad · DB_Linea.Zonas.Z3 · visible con 1"),
+             anim="Receta C · variable DB_Linea.Zonas.Z3 · visible con 1"),
         dict(t="bottle", x=703, y=150, w=16, h=24, on=False, var="DB_Linea.Zonas.Z4", obj=OBJ_RECT,
-             anim="Visibilidad · DB_Linea.Zonas.Z4 · visible con 1"),
+             anim="Receta C · variable DB_Linea.Zonas.Z4 · visible con 1"),
         dict(t="text", x=212, y=240, w=124, h=18, txt="Botellas en línea", size=12, color="tenue", obj=OBJ_TEXT),
         io(338, 236, 40, 24, "DB_FIFO.N_Botellas", "9", "2", size=14),
     ]
@@ -175,7 +175,7 @@ def imagen_inicio():
         y = 308 + j * 34
         o.append(dict(t="text", x=620, y=y + 2, w=48, h=16, txt=lab, size=12, color="tenue", obj=OBJ_TEXT))
         o.append(dict(t="bar", x=670, y=y + 2, w=78, h=16, var=f"DB_Linea.Cajas.{cnt}", demo=100 * val / cap, fill="acento",
-                      obj=OBJ_BAR, anim=f"Mín 0 · Máx {cap} · sin escala"))
+                      obj=OBJ_BAR, anim=f"Receta F · mín 0 · máx {cap} · color de barra acento"))
         o.append(io(754, y, 30, 22, f"DB_Linea.Cajas.{cnt}", "99", str(val), size=13))
     return o
 
@@ -191,10 +191,10 @@ def imagen_manual():
         dict(t="text", x=20, y=200, w=176, h=60, txt="Mantén pulsado el|botón para mover.", size=12, color="tenue",
              obj=OBJ_TEXT),
         dict(t="rect", x=20, y=300, w=176, h=100, fill="aviso", r=4, demo_hide=True, var="DB_Linea.Modo.Manual_OK",
-             anim="Visibilidad · DB_Linea.Modo.Manual_OK · visible con 0", obj=OBJ_RECT,
+             anim="Receta C · variable DB_Linea.Modo.Manual_OK · visible con 0", obj=OBJ_RECT,
              nota="Aviso naranja (en el boceto, transparente: con Manual_OK = 1 no se ve)"),
         dict(t="text", x=20, y=330, w=176, h=40, txt="PON EL SELECTOR|EN MANUAL", size=14, bold=True, color="blanco",
-             align="c", demo_hide=True, var="DB_Linea.Modo.Manual_OK", anim="Visibilidad · DB_Linea.Modo.Manual_OK · visible con 0",
+             align="c", demo_hide=True, var="DB_Linea.Modo.Manual_OK", anim="Receta C · variable DB_Linea.Modo.Manual_OK · visible con 0",
              obj=OBJ_TEXT),
     ]
     o += panel(216, 56, 576, 116, "CINTAS")
@@ -203,14 +203,14 @@ def imagen_manual():
     for i, (txt, v, sal) in enumerate(bot):
         x = 228 + i * 112
         o.append(dict(t="button", x=x, y=92, w=104, h=64, txt=txt, fill="boton", color="blanco", size=13, obj=OBJ_BTN,
-                      var=f"DB_HMI.Manual.{v}", anim="Pulsar › ActivarBit · Soltar › DesactivarBit · Visibilidad Manual_OK = 1"))
+                      var=f"DB_HMI.Manual.{v}", anim="Receta D (Pulsar › ActivarBit · Soltar › DesactivarBit) + Receta C (DB_Linea.Modo.Manual_OK visible con 1)"))
         o.append(lamp(x + 84, 98, 14, sal, "marcha", demo=(i == 1), nota="Piloto encima del botón (traer al frente)"))
     o += panel(216, 180, 576, 100, "MÁQUINAS")
     for i, (txt, v, sal) in enumerate([("BAJAR TAP-01", "TAP01_Bajar", "TAP01_Bajar"),
                                        ("EMPUJADOR", "Empujador", "Empujador_Avanzar")]):
         x = 228 + i * 176
         o.append(dict(t="button", x=x, y=212, w=164, h=56, txt=txt, fill="boton", color="blanco", size=13, obj=OBJ_BTN,
-                      var=f"DB_HMI.Manual.{v}", anim="Pulsar › ActivarBit · Soltar › DesactivarBit · Visibilidad Manual_OK = 1"))
+                      var=f"DB_HMI.Manual.{v}", anim="Receta D (Pulsar › ActivarBit · Soltar › DesactivarBit) + Receta C (DB_Linea.Modo.Manual_OK visible con 1)"))
         o.append(lamp(x + 144, 218, 14, sal, "marcha"))
     o += [
         lamp(596, 214, 16, "DB_Linea.Taponado.Arriba", "marcha", demo=1),
@@ -225,7 +225,7 @@ def imagen_manual():
         for j, (txt, v) in enumerate([("RETIRAR", f"Retirar_{suf}"), ("PONER", f"Reponer_{suf}")]):
             o.append(dict(t="button", x=x + j * 90, y=334, w=84, h=52, txt=txt, fill="boton", color="blanco", size=12,
                           obj=OBJ_BTN, var=f"DB_HMI.Manual.{v}",
-                          anim="Pulsar › ActivarBit · Soltar › DesactivarBit · Visibilidad Manual_OK = 1"))
+                          anim="Receta D (Pulsar › ActivarBit · Soltar › DesactivarBit) + Receta C (DB_Linea.Modo.Manual_OK visible con 1)"))
     return o
 
 
@@ -261,7 +261,7 @@ def imagen_produccion():
         o.append(dict(t="text", x=x + 12, y=y + 8, w=152, h=16, txt=lab, size=12, color="tenue", obj=OBJ_TEXT))
         o.append(io(x + 12, y + 30, 152, 40, f"DB_Linea.Produccion.{var}", "9999999", demo, size=26))
     o.append(dict(t="button", x=20, y=360, w=364, h=46, txt="PONER A 0 LA PRODUCCIÓN", fill="fallo", color="blanco", size=14,
-                  obj=OBJ_BTN, var="DB_HMI.Ordenes.Reset_Produccion", anim="Pulsar › ActivarBit · Soltar › DesactivarBit"))
+                  obj=OBJ_BTN, var="DB_HMI.Ordenes.Reset_Produccion", anim="Receta D (Pulsar › ActivarBit · Soltar › DesactivarBit)"))
     o += panel(404, 56, 388, 360, "PARÁMETROS")
     params = [("Botellas a la vez", "Max_Botellas", "9", "3", "botellas"),
               ("Llenado objetivo", "Pct_Llenado", "999.9", "90.0", "%"),
@@ -414,7 +414,7 @@ def tabla_objetos(objs):
             f"<td class='mono'>{o['x']}, {o['y']}</td><td class='mono'>{o['w']} × {o['h']}</td>"
             f"<td>{col}</td><td>{'<br>'.join(detalle)}</td></tr>")
     return ("<div class='tw'><table class='vt'><thead><tr><th>Nº</th><th>Objeto</th><th>X, Y</th><th>Ancho × alto</th>"
-            "<th>Colores</th><th>Texto · variable · animación</th></tr></thead><tbody>" + "".join(filas) + "</tbody></table></div>")
+            "<th>Colores</th><th>Texto · variable · cómo (receta)</th></tr></thead><tbody>" + "".join(filas) + "</tbody></table></div>")
 
 
 def construir():
@@ -473,7 +473,7 @@ td.n{font:700 12px var(--f-mono);color:#6A1B9A}
 .src{font-size:11.5px;color:var(--muted)}
 .tog{display:inline-flex;gap:8px;align-items:center;font-size:14px;margin:6px 0 0}
 """
-    nav = "".join(f"<a href='#{i}'>{t}</a>" for i, t in [("principios", "Principios"), ("paleta", "Colores"), ("pasos", "Cómo"),
+    nav = "".join(f"<a href='#{i}'>{t}</a>" for i, t in [("principios", "Principios"), ("paleta", "Colores"), ("pasos", "Cómo"), ("recetas", "Recetas"),
                                                         ("plantilla", "Plantilla"), ("inicio", "Inicio"), ("manual", "Manual"),
                                                         ("alarmas", "Alarmas"), ("produccion", "Producción")])
     return f"""<title>Diseño HMI Llenado</title>
@@ -533,6 +533,77 @@ td.n{font:700 12px var(--f-mono);color:#6A1B9A}
   </section>
 
   <section id="pasos"><h2>Cómo pasarlo a WinCC</h2>{pasos}</section>
+
+  <section id="recetas"><h2>Recetas: cómo se hace cada cosa</h2>
+  <p class="lead">Todo lo que pide el diseño se hace con estas 6 recetas. En las tablas, la columna de la derecha dice qué receta
+  usar en cada objeto. Primero selecciona el objeto con un clic; todo se hace abajo, en la ventana de inspección.</p>
+
+  <h3>A · Posición, tamaño y color fijo</h3>
+  <ol class="acc">
+   <li>Selecciona el objeto. Abajo: <b>Propiedades</b> › pestaña <b>Propiedades</b>.</li>
+   <li><b>Diseño</b> (o «Posición y tamaño»): escribe X, Y, Ancho y Alto de la tabla.</li>
+   <li><b>Apariencia</b>: <b>Fondo › Color</b> es el relleno. <b>Borde › Color</b> y <b>Ancho</b> son el contorno.
+    En un campo de texto, el color de las letras es el <b>Color de texto</b> o primer plano.</li>
+   <li>Para escribir un color exacto: despliega el color › <b>Más colores…</b> › escribe Rojo, Verde y Azul (los números RGB
+    de la tabla de colores) › Aceptar.</li>
+   <li>Si no quieres relleno (por ejemplo, el texto encima de la bomba): Fondo › Estilo <b>Transparente</b>.</li>
+   <li><b>Formato de texto</b>: fuente Tahoma, tamaño y negrita. <b>Alineación</b> horizontal y vertical: centrado si la tabla lo dice.</li>
+  </ol>
+
+  <h3>B · Color que cambia con una variable (lámparas, bomba, cintas…)</h3>
+  <ol class="acc">
+   <li>Ponle primero el color de «apagado» con la receta A (gris 207, 216, 220). Es el que verás en el editor.</li>
+   <li>Abajo: <b>Propiedades</b> › pestaña <b>Animaciones</b>.</li>
+   <li>En el árbol de la izquierda, <b>Visualización</b> › doble clic en <b>Agregar nueva animación</b> › elige <b>Apariencia</b>.</li>
+   <li><b>Variable</b>: pulsa <b>…</b> y busca la variable de la tabla. Las del DB están en PLC_Linea › Bloques de programa ›
+    DB_Linea; las salidas, como <span class="mono">Cinta_C1_Entrada</span>, en Variables PLC.</li>
+   <li><b>Tipo</b>: <b>Rango</b>.</li>
+   <li>En la tabla de debajo añade dos filas:
+    <br>Fila 1 · Rango <b>0</b> · Color de fondo gris (207, 216, 220) · Color de primer plano el mismo · Parpadeo No.
+    <br>Fila 2 · Rango <b>1</b> · Color de fondo el de la tabla (verde 46, 160, 67; naranja 245, 158, 11; rojo 211, 47, 47…) ·
+    Color de primer plano el mismo · Parpadeo No.</li>
+   <li>Copia y pega el objeto: la animación se copia también. En la copia solo cambias la variable y, si hace falta, el color.</li>
+  </ol>
+
+  <h3>C · Que algo aparezca o desaparezca (botellas, botones de manual, aviso)</h3>
+  <ol class="acc">
+   <li>Propiedades › <b>Animaciones</b> › <b>Visualización</b> › Agregar nueva animación › <b>Visibilidad</b>.</li>
+   <li><b>Variable</b>: la de la tabla.</li>
+   <li><b>Rango</b>: de 1 a 1 si la tabla dice «visible con 1», o de 0 a 0 si dice «visible con 0». Marca <b>Visible</b>.</li>
+   <li>Se pueden seleccionar varios objetos a la vez (Ctrl + clic) y ponerles la misma visibilidad de una vez.</li>
+  </ol>
+
+  <h3>D · Lo que hace un botón (eventos)</h3>
+  <ol class="acc">
+   <li>Selecciona el botón › Propiedades › pestaña <b>Eventos</b>.</li>
+   <li>Navegación: evento <b>Hacer clic</b> › &lt;Agregar función&gt; › <b>ActivarImagen</b> › nombre de la imagen.</li>
+   <li>Botones de mantener pulsado: evento <b>Pulsar</b> › <b>ActivarBit</b> con la variable; evento <b>Soltar</b> ›
+    <b>DesactivarBit</b> con la misma variable. Están en Procesamiento de bits.</li>
+   <li>El texto del botón se escribe en Propiedades › <b>General</b> › Texto.</li>
+  </ol>
+
+  <h3>E · Campos que muestran o piden un número (Campo E/S)</h3>
+  <ol class="acc">
+   <li>Propiedades › <b>General</b>: <b>Variable</b> la de la tabla.</li>
+   <li><b>Modo</b>: <b>Salida</b> si solo se muestra; <b>Entrada/salida</b> si el operario lo puede cambiar (parámetros).</li>
+   <li><b>Formato de representación</b>: Decimal. <b>Patrón de formato</b>: el de la tabla, con un 9 por cada cifra y el punto
+    para los decimales (por ejemplo <span class="mono">999.9</span>). La unidad (%, L…) va en un campo de texto al lado o en
+    «Unidad» si tu versión la tiene.</li>
+   <li>Apariencia: fondo blanco, borde 1 px gris (196, 200, 206), texto azul (25, 118, 210) o negro en los parámetros.
+    Alineación a la derecha.</li>
+   <li>El <b>Campo E/S simbólico</b> es igual, pero en vez de un número muestra un texto de una lista (ver el rótulo de estado).</li>
+  </ol>
+
+  <h3>F · Barras (nivel del tanque y llenado de cajas)</h3>
+  <ol class="acc">
+   <li>Herramientas › Elementos › <b>Barra</b>. Posición y tamaño con la receta A.</li>
+   <li>Propiedades › <b>General</b>: <b>Variable de proceso</b> la de la tabla. <b>Máximo</b> y <b>Mínimo</b> los de la tabla.</li>
+   <li><b>Apariencia</b>: Color de la barra (agua 64, 156, 214 o acento 25, 118, 210), fondo blanco.</li>
+   <li>En <b>Escalas</b> (o «Representación») desactiva la escala y las marcas si las muestra: queda más limpio.</li>
+   <li>Si la barra es horizontal (cajas), cambia la <b>Dirección</b> a «de izquierda a derecha».</li>
+  </ol>
+  </section>
+
   {secciones}
   <footer>Generado desde herramientas/diseno_hmi.py</footer>
 </div>
