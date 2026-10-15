@@ -65,7 +65,7 @@ NOMBRE_COLOR = {"apagado": "gris claro", "marcha": "verde", "aviso": "naranja", 
 
 def rgb(k):
     """Nombre del color y sus números RGB, tal y como se escriben en WinCC."""
-    return f"{NOMBRE_COLOR[k]} ({PAL[k][1]})"
+    return f"{NOMBRE_COLOR[k]} (RGB {PAL[k][1]} · código {PAL[k][0]})"
 
 
 def anim_color(var, on="marcha", borde=None):
