@@ -96,15 +96,16 @@ def io(x, y, w, h, var, fmt, demo, size=14, modo="Salida", color="acento", bold=
 def imagen_inicio():
     o = panel(8, 56, 180, 360, "TANQUE")
     o += [
-        dict(t="pump", x=28, y=84, w=40, h=40, on=True, obj=("Círculo + Polígono", "Herramientas › Objetos básicos"),
+        dict(t="pump", x=28, y=84, w=40, h=40, on=True, obj=("Círculo + Campo de texto", "Herramientas › Objetos básicos"),
              var="DB_Linea.Tanque.Bomba_Marcha", anim="En el círculo: " + anim_color("DB_Linea.Tanque.Bomba_Marcha"),
-             nota="Círculo 40 px con borde 2 px gris oscuro. Encima, un Polígono blanco (triángulo) con los puntos "
-                  "(39, 113) · (48, 90) · (57, 113)"),
+             nota="Círculo 40 × 40 con borde 2 px gris oscuro. Encima, un Campo de texto en (28, 92), 40 × 24, con el "
+                  "símbolo ▲ (cópialo de aquí), Tahoma 18 negrita, blanco, centrado y fondo transparente. "
+                  "Si en la pantalla sale un cuadrado, escribe una P"),
         dict(t="text", x=76, y=94, w=100, h=18, txt="Bomba", size=12, color="tenue", obj=OBJ_TEXT),
-        dict(t="valve", x=36, y=138, w=24, h=24, on=True, obj=("2 × Polígono (triángulos)", "Herramientas › Objetos básicos"),
-             var="VS_Valvula_Seguridad", anim="En los dos triángulos: " + anim_color("VS_Valvula_Seguridad"),
-             nota="Triángulo izquierdo (36, 138) · (48, 150) · (36, 162). Triángulo derecho (60, 138) · (48, 150) · (60, 162). "
-                  "Borde 1,5 px gris oscuro"),
+        dict(t="valve", x=36, y=138, w=24, h=24, on=True, obj=("Rectángulo + 2 Líneas", "Herramientas › Objetos básicos"),
+             var="VS_Valvula_Seguridad", anim="En el rectángulo: " + anim_color("VS_Valvula_Seguridad"),
+             nota="Rectángulo 24 × 24 con borde 1 px gris oscuro. Encima, dos Líneas gris oscuro de 2 px que forman una X: "
+                  "de (36, 138) a (60, 162) y de (60, 138) a (36, 162)"),
         dict(t="text", x=76, y=142, w=104, h=18, txt="Válv. seguridad", size=12, color="tenue", obj=OBJ_TEXT),
         dict(t="tank", x=40, y=184, w=100, h=170, obj=OBJ_RECT, nota="Rectángulo redondeado (radio 8), borde 2 px tenue"),
         dict(t="bar", x=44, y=188, w=92, h=162, var="DB_Linea.Tanque.Nivel_Pct", demo=62, fill="agua", obj=OBJ_BAR,
@@ -346,8 +347,9 @@ def svg_objeto(o):
                 f'<path d="M{x + r - 9} {y + r + 9} L{x + r} {y + 6} L{x + r + 9} {y + r + 9} Z" fill="{C["blanco"]}"/>')
     if t == "valve":
         col = C["marcha"] if o.get("on") else C["apagado"]
-        return (f'<path d="M{x} {y} L{x + w} {y + h} L{x + w} {y} L{x} {y + h} Z" fill="{col}" stroke="{C["cabecera"]}" '
-                f'stroke-width="1.5" stroke-linejoin="round"/>')
+        return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{col}" stroke="{C["cabecera"]}"/>'
+                f'<line x1="{x}" y1="{y}" x2="{x + w}" y2="{y + h}" stroke="{C["cabecera"]}" stroke-width="2"/>'
+                f'<line x1="{x + w}" y1="{y}" x2="{x}" y2="{y + h}" stroke="{C["cabecera"]}" stroke-width="2"/>')
     if t == "belt":
         col = C["marcha"] if o.get("on") else C["apagado"]
         out = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="3" fill="{col}"/>'
@@ -450,9 +452,9 @@ def construir():
 <li><b>Lámparas y equipos que cambian de color</b>: Propiedades › Animaciones › <b>Visualización › Apariencia</b>. Variable de la
  tabla, tipo <b>Rango</b>: valor 0 color «apagado», valor 1 su color (marcha, aviso o fallo).</li>
 <li><b>Botellas por zona</b>: animación <b>Visibilidad</b> con la variable de la zona, visible con 1.</li>
-<li><b>Bomba y válvula</b>: se dibujan con <b>objetos básicos</b> (círculo y polígonos), con los puntos que da la tabla.
- Un polígono se dibuja haciendo clic en cada punto y doble clic en el último; luego, en Propiedades › <b>Puntos</b>, escribes las
- coordenadas exactas. No hace falta la biblioteca de gráficos de WinCC.</li>
+<li><b>Bomba y válvula</b>: en el KTP700 Basic los objetos básicos son Línea, Elipse, Círculo, Rectángulo, Campo de texto y
+ Visor de gráficos (no hay polígonos). La bomba es un círculo con el símbolo ▲ en un campo de texto encima, y la válvula un
+ rectángulo con dos líneas en X. Las medidas exactas están en la tabla de la imagen Inicio (objetos 3 y 5).</li>
 <li><b>Un objeto, varios iguales</b>: haz el primero completo (posición, colores, animación), cópialo y pégalo; en la copia
  solo cambias X, Y y la variable.</li>
 </ol>"""
