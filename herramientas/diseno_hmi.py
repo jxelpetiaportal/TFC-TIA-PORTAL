@@ -504,6 +504,23 @@ td.n{font:700 12px var(--f-mono);color:#6A1B9A}
   En el Campo E/S simbólico: lista <span class="mono">Estados</span> y animación Apariencia por valor con estos colores de fondo y
   texto blanco.</p>
   <div class="tw"><table class="vt"><thead><tr><th>Valor</th><th>Texto</th><th>Fondo</th></tr></thead><tbody>{est}</tbody></table></div>
+  <h3>Cómo hacer el rótulo de estado paso a paso</h3>
+  <ol class="acc">
+   <li><b>Lista de textos</b>: HMI_1 › <b>Listas de textos y gráficos</b> › pestaña Listas de textos › doble clic en Agregar.
+    Nombre <span class="mono">Estados</span>, Selección <b>Valor/Rango</b>. Abajo, una entrada por fila: valor 0 texto LISTA,
+    valor 1 EN MARCHA… hasta 5 MODO MANUAL.</li>
+   <li>Arrastra un <b>Campo E/S simbólico</b> a la plantilla y escribe su posición y tamaño (500, 10 · 196 × 28).</li>
+   <li>Propiedades › <b>General</b>: Variable <span class="mono">DB_Linea.Modo.Estado</span>, <b>Modo: Salida</b> y Lista de
+    textos <span class="mono">Estados</span>. Al poner el modo en <b>Salida</b> desaparece la flecha del desplegable: el operario
+    no puede cambiar el estado, solo verlo.</li>
+   <li>Propiedades › <b>Apariencia</b>: fondo 55, 71, 79 (gris), texto blanco, borde sin línea. Formato de texto: Tahoma 13
+    negrita, centrado.</li>
+   <li>Animaciones › Visualización › <b>Apariencia</b>: variable <span class="mono">DB_Linea.Modo.Estado</span>, tipo
+    <b>Rango</b>. Añade una fila por valor (0 a 5) con el color de fondo de la tabla y el color de primer plano blanco.</li>
+  </ol>
+  <p class="note">En el editor de TIA el campo se ve blanco o gris y con el primer texto de la lista: es normal. El texto y el
+  color cambian cuando la pantalla está funcionando (simulación o panel real). El boceto lo dibuja como se vería con la
+  línea en marcha (Estado = 1).</p>
   </section>
 
   <section id="pasos"><h2>Cómo pasarlo a WinCC</h2>{pasos}</section>
