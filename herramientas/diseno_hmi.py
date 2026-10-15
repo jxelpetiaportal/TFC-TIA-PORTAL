@@ -516,7 +516,8 @@ td.n{font:700 12px var(--f-mono);color:#6A1B9A}
    <li>Propiedades › <b>Apariencia</b>: fondo 55, 71, 79 (gris), texto blanco, borde sin línea. Formato de texto: Tahoma 13
     negrita, centrado.</li>
    <li>Animaciones › Visualización › <b>Apariencia</b>: variable <span class="mono">DB_Linea.Modo.Estado</span>, tipo
-    <b>Rango</b>. Añade una fila por valor (0 a 5) con el color de fondo de la tabla y el color de primer plano blanco.</li>
+    <b>Rango</b>. Añade una fila por valor (0 a 5) con el color de fondo de la tabla y el color de primer plano (las letras)
+    blanco. Parpadeo: <b>No</b> en todas menos en la 4 (PARADA DE SEGURIDAD), que va con parpadeo <b>Sí</b>.</li>
   </ol>
   <p class="note">En el editor de TIA el campo se ve blanco o gris y con el primer texto de la lista: es normal. El texto y el
   color cambian cuando la pantalla está funcionando (simulación o panel real). El boceto lo dibuja como se vería con la
