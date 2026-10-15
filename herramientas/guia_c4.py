@@ -92,6 +92,16 @@ def partes(G):
             ("<b>Producción</b>", "Contadores totales, parámetros y botón para poner la producción a 0."),
         ])), 18))
 
+    p.append(paso("hmi-diseno", "Diseño de las pantallas", (
+        "<p>Antes de dibujar, abre la página <b>Diseño de la HMI</b>: "
+        "<a href='https://claude.ai/artifact/SpCs1sZ6onPePBwdpyLYcs'>https://claude.ai/artifact/SpCs1sZ6onPePBwdpyLYcs</a>. "
+        "Tiene un boceto de cada imagen a tamaño real (800 × 480) y una tabla con la posición X/Y, el tamaño, los colores, la "
+        "variable y la animación de cada objeto. Los pasos de esta parte dicen qué hacer; el diseño dice dónde y cómo queda.</p>"
+        + lista("Colores: fondo gris neutro y color solo para estados (verde marcha, naranja aviso, rojo fallo).",
+                "Una <b>plantilla</b> con la cabecera y la barra de navegación, común a las 4 imágenes.",
+                f"Un rótulo de estado en la cabecera con {m('DB_Linea.Modo.Estado')} (FC10, segmentos 38 a 43) y la lista de "
+                "textos <span class='mono'>Estados</span>.", ordenada=False)), 18))
+
     p.append(paso("hmi-anadir", "Añadir la pantalla", lista(
         "En el árbol: " + ruta("Agregar dispositivo", "HMI", "SIMATIC Basic Panel", '7" Display', "KTP700 Basic",
                                 "6AV2 123-2GB03-0AX0") + ". Versión 15.0. Aceptar.",

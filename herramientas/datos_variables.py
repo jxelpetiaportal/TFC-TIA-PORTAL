@@ -290,6 +290,7 @@ DB_LINEA = [
     ("Modo", "Rearme_Pendiente", "Bool", "TRUE", "", "Se activa con cualquier causa y solo se borra con REARME cuando ya no queda ninguna. Arranca a 1 al encender la CPU."),
     ("Modo", "Parada_Seguridad", "Bool", "TRUE", "", "Hay causa o falta el rearme. Todas las FC lo miran: si vale 1, nada se mueve en automático."),
     ("Modo", "Manual_OK", "Bool", "FALSE", "", "Selector en MANUAL y seta sin pulsar: se permiten los movimientos manuales desde la HMI."),
+    ("Modo", "Estado", "Int", "0", "", "Estado para la HMI: 0 lista · 1 en marcha · 2 terminando · 3 rearme pendiente · 4 parada de seguridad · 5 manual."),
     # Emergencias (causas instantáneas)
     ("Emergencia", "Seta", "Bool", "FALSE", "", "Causa activa ahora: seta pulsada."),
     ("Emergencia", "Nivel_99", "Bool", "FALSE", "", "Causa activa ahora: tanque al 99 %."),

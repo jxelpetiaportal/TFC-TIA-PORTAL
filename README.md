@@ -12,6 +12,7 @@ llenado con caudalímetro, taponadora TAP-01, rechazo de botellas malas y clasif
 |---|---|
 | `docs/01_Tabla_Variables.html` | Tabla de variables completa: E/S, analógicas, DBs, FIFO, temporizadores, alarmas por fase y esquema de la línea. Se abre con cualquier navegador. |
 | `docs/02_Guia_Completa.html` | Guía completa, todo a mano y en 18 partes: proyecto, variables, datos, los 12 bloques KOP segmento a segmento, pruebas en PLCSIM, Factory I/O y HMI. |
+| `docs/03_Diseno_HMI.html` | Diseño de la pantalla HMI: boceto de cada imagen a 800 × 480 y tabla de objetos (posición, tamaño, colores, variable, animación). |
 | `tia/Variables_PLC.xlsx` | Variables PLC para importar en TIA Portal (Variables PLC → Importar). |
 | `tia/fuentes/` | Fuentes externas del UDT y los DB (Fuentes externas → Generar bloques a partir de la fuente). |
 | `herramientas/` | Scripts que generan todo lo anterior. Los datos están en `datos_variables.py` y los dibujos KOP salen de `kop.py`. |
@@ -22,6 +23,7 @@ Para regenerar después de cambiar algo:
 pip install openpyxl
 python3 herramientas/generar.py
 python3 herramientas/guia_completa.py
+python3 herramientas/diseno_hmi.py
 ```
 
 ## Estado

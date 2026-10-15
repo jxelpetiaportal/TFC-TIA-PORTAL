@@ -306,6 +306,18 @@ def partes(G):
             serie=[c('"DB_HMI".Ordenes.Reset_Produccion'), nc(CM)]), "Solo con el ciclo parado.")
     )
     p.append(paso("fc10-general", "Segmentos 31 a 37 · Fase 7, pilotos y producción", txt, 15))
+    est = MOD + "Estado"
+    txt = (
+        "<p>Un número que resume el estado de la línea. La pantalla HMI lo usa para el rótulo de estado de la cabecera. "
+        "Los segmentos van en este orden a propósito: si se cumplen varios, gana el último.</p>"
+        + s("Estado 0 · lista", kop(mv("0", "Int", [est]), serie=[c(g("AlwaysTRUE"))]))
+        + s("Estado 1 · en marcha", kop(mv("1", "Int", [est]), serie=[c(CM), nc(MOD + "Fin_Ciclo")]))
+        + s("Estado 2 · terminando", kop(mv("2", "Int", [est]), serie=[c(MOD + "Fin_Ciclo")]))
+        + s("Estado 3 · rearme pendiente", kop(mv("3", "Int", [est]), serie=[c(MOD + "Rearme_Pendiente")]))
+        + s("Estado 4 · parada de seguridad", kop(mv("4", "Int", [est]), serie=[c(EMG + "Hay_Causa")]))
+        + s("Estado 5 · modo manual", kop(mv("5", "Int", [est]), serie=[c(EMG + "Manual")]))
+    )
+    p.append(paso("fc10-estado", "Segmentos 38 a 43 · Estado de la línea para la HMI", txt, 15))
     p.append(paso("fc10-ob1", "Llamar a FC10 desde el OB1", ob1(10, "FC_Alarmas_Lamparas", "FC10 · Alarmas y lámparas"), 15))
     P.append((15, "FC10 · Alarmas y lámparas", p,
               "Junta las alarmas rojas en el fallo de equipo y enciende las 21 lámparas de fase y los 3 pilotos del cuadro."))
