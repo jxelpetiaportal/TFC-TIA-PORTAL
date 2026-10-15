@@ -96,11 +96,15 @@ def io(x, y, w, h, var, fmt, demo, size=14, modo="Salida", color="acento", bold=
 def imagen_inicio():
     o = panel(8, 56, 180, 360, "TANQUE")
     o += [
-        dict(t="pump", x=28, y=84, w=40, h=40, on=True, obj=OBJ_GRAF, var="DB_Linea.Tanque.Bomba_Marcha",
-             anim="Si no hay símbolo: Círculo 40 px · " + anim_color("DB_Linea.Tanque.Bomba_Marcha"), nota="Busca «pump»"),
+        dict(t="pump", x=28, y=84, w=40, h=40, on=True, obj=("Círculo + Polígono", "Herramientas › Objetos básicos"),
+             var="DB_Linea.Tanque.Bomba_Marcha", anim="En el círculo: " + anim_color("DB_Linea.Tanque.Bomba_Marcha"),
+             nota="Círculo 40 px con borde 2 px gris oscuro. Encima, un Polígono blanco (triángulo) con los puntos "
+                  "(39, 113) · (48, 90) · (57, 113)"),
         dict(t="text", x=76, y=94, w=100, h=18, txt="Bomba", size=12, color="tenue", obj=OBJ_TEXT),
-        dict(t="valve", x=36, y=138, w=24, h=24, on=True, obj=OBJ_GRAF, var="VS_Valvula_Seguridad",
-             anim="Si no hay símbolo: Rectángulo 24 px · " + anim_color("VS_Valvula_Seguridad"), nota="Busca «valve»"),
+        dict(t="valve", x=36, y=138, w=24, h=24, on=True, obj=("2 × Polígono (triángulos)", "Herramientas › Objetos básicos"),
+             var="VS_Valvula_Seguridad", anim="En los dos triángulos: " + anim_color("VS_Valvula_Seguridad"),
+             nota="Triángulo izquierdo (36, 138) · (48, 150) · (36, 162). Triángulo derecho (60, 138) · (48, 150) · (60, 162). "
+                  "Borde 1,5 px gris oscuro"),
         dict(t="text", x=76, y=142, w=104, h=18, txt="Válv. seguridad", size=12, color="tenue", obj=OBJ_TEXT),
         dict(t="tank", x=40, y=184, w=100, h=170, obj=OBJ_RECT, nota="Rectángulo redondeado (radio 8), borde 2 px tenue"),
         dict(t="bar", x=44, y=188, w=92, h=162, var="DB_Linea.Tanque.Nivel_Pct", demo=62, fill="agua", obj=OBJ_BAR,
@@ -369,8 +373,9 @@ def svg_objeto(o):
     return ""
 
 
-def svg_imagen(objs, ident):
-    cuerpo = "".join(svg_objeto(o) for o in objs)
+def svg_imagen(objs, ident, fondo=()):
+    """fondo: objetos que se dibujan sin número (la plantilla, en las imágenes)."""
+    cuerpo = "".join(svg_objeto(o) for o in list(fondo) + list(objs))
     nums = ""
     for i, o in enumerate(objs, 1):
         cx, cy = o["x"] + 2, o["y"] + 2
@@ -425,9 +430,9 @@ def construir():
         objs = fn()
         secciones += (f"<section id='{ident}'><h2>Imagen {e(nombre)}</h2><p class='lead'>{e(desc)} La cabecera y la barra "
                       f"de abajo vienen de la plantilla.</p>"
-                      f"<div class='scr'>{svg_imagen(pl + objs, ident)}</div>"
-                      f"<p class='note'>La tabla numera solo los objetos de esta imagen (los de la plantilla están arriba). "
-                      f"En el boceto los números de la plantilla van del 1 al {len(pl)} y los de la imagen siguen después.</p>"
+                      f"<div class='scr'>{svg_imagen(objs, ident, fondo=pl)}</div>"
+                      f"<p class='note'>Los números del boceto son los de la tabla. La cabecera y la barra de abajo no llevan "
+                      f"número porque son de la plantilla (tabla «Plantilla común»).</p>"
                       f"{tabla_objetos(objs)}</section>")
 
     pasos = """
@@ -445,8 +450,9 @@ def construir():
 <li><b>Lámparas y equipos que cambian de color</b>: Propiedades › Animaciones › <b>Visualización › Apariencia</b>. Variable de la
  tabla, tipo <b>Rango</b>: valor 0 color «apagado», valor 1 su color (marcha, aviso o fallo).</li>
 <li><b>Botellas por zona</b>: animación <b>Visibilidad</b> con la variable de la zona, visible con 1.</li>
-<li><b>Símbolos de bomba y válvula</b>: Herramientas › <b>Gráficos</b> › Carpetas de gráficos de WinCC. Busca «pump» y «valve».
- Si en tu versión no aparecen, dibújalos con un círculo y un rectángulo como en el boceto: quedan igual de bien.</li>
+<li><b>Bomba y válvula</b>: se dibujan con <b>objetos básicos</b> (círculo y polígonos), con los puntos que da la tabla.
+ Un polígono se dibuja haciendo clic en cada punto y doble clic en el último; luego, en Propiedades › <b>Puntos</b>, escribes las
+ coordenadas exactas. No hace falta la biblioteca de gráficos de WinCC.</li>
 <li><b>Un objeto, varios iguales</b>: haz el primero completo (posición, colores, animación), cópialo y pégalo; en la copia
  solo cambias X, Y y la variable.</li>
 </ol>"""
