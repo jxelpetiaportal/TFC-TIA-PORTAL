@@ -308,6 +308,10 @@ def partes(G):
     p.append(paso("fc10-general", "Segmentos 31 a 37 · Fase 7, pilotos y producción", txt, 15))
     est = MOD + "Estado"
     txt = (
+        "<p><b>Antes de empezar</b>, crea la variable: abre <span class='mono'>DB_Linea</span>, despliega el Struct "
+        "<span class='mono'>Modo</span> y, en la fila vacía de debajo de <span class='mono'>Manual_OK</span>, escribe "
+        "<span class='mono'>Estado</span>, tipo <span class='mono'>Int</span>, valor de arranque <span class='mono'>0</span>. "
+        "Compila DB_Linea (si ya lo tenías creado, añádela ahora; no se pierde nada).</p>"
         "<p>Un número que resume el estado de la línea. La pantalla HMI lo usa para el rótulo de estado de la cabecera. "
         "Los segmentos van en este orden a propósito: si se cumplen varios, gana el último.</p>"
         + s("Estado 0 · lista", kop(mv("0", "Int", [est]), serie=[c(g("AlwaysTRUE"))]))
