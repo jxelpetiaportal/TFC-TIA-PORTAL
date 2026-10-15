@@ -57,8 +57,21 @@ OBJ_TIME = ("Campo de fecha/hora", "Herramientas › Elementos")
 OBJ_GRAF = ("Visor de gráficos", "Herramientas › Gráficos › Carpetas de gráficos de WinCC")
 
 
-def anim_color(var, on="marcha"):
-    return f"Receta B · variable {var} · valor 0 = apagado, valor 1 = {on}"
+NOMBRE_COLOR = {"apagado": "gris claro", "marcha": "verde", "aviso": "naranja", "fallo": "rojo", "agua": "azul agua",
+                "acento": "azul", "boton": "gris oscuro", "cabecera": "gris muy oscuro", "blanco": "blanco",
+                "tenue": "gris azulado", "borde": "gris borde", "panel": "gris panel", "titulo": "gris título",
+                "texto": "negro", "fondo": "gris fondo"}
+
+
+def rgb(k):
+    """Nombre del color y sus números RGB, tal y como se escriben en WinCC."""
+    return f"{NOMBRE_COLOR[k]} ({PAL[k][1]})"
+
+
+def anim_color(var, on="marcha", borde=None):
+    pp = f"primer plano {rgb(borde)}" if borde else "primer plano el mismo color que el fondo"
+    return (f"Receta B · variable {var} · Rango 0 → fondo {rgb('apagado')} · Rango 1 → fondo {rgb(on)} · "
+            f"en las dos filas {pp} y parpadeo No")
 
 
 def plantilla():
@@ -67,7 +80,9 @@ def plantilla():
         dict(t="rect", x=0, y=0, w=800, h=48, fill="cabecera", obj=OBJ_RECT, nota="Cabecera, sin borde"),
         dict(t="text", x=16, y=12, w=240, h=24, txt="LÍNEA DE LLENADO", size=16, bold=True, color="blanco", obj=OBJ_TEXT),
         dict(t="sym", x=500, y=10, w=196, h=28, var="DB_Linea.Modo.Estado", demo=1, obj=OBJ_SYM,
-             anim="Receta E (modo Salida, lista de textos «Estados») + Receta B con 6 valores (tabla de estados)"),
+             anim="Receta E (modo Salida, lista de textos «Estados») + Receta B con 6 filas: "
+                  + " · ".join(f"Rango {n} → fondo {rgb(c)}" for n, _, c in ESTADOS)
+                  + " · en todas primer plano blanco (255, 255, 255) · parpadeo Sí solo en el 4"),
         dict(t="time", x=708, y=12, w=80, h=24, obj=OBJ_TIME, nota="Modo: hora del sistema, texto blanco"),
         dict(t="rect", x=0, y=424, w=800, h=56, fill="cabecera", obj=OBJ_RECT, nota="Barra de navegación"),
     ]
@@ -84,7 +99,7 @@ def panel(x, y, w, h, titulo):
 
 def lamp(x, y, d, var, color_on, demo=0, nota=""):
     return dict(t="circle", x=x, y=y, w=d, h=d, fill=color_on if demo else "apagado", obj=OBJ_CIRC,
-                var=var, anim=anim_color(var, color_on), nota=nota)
+                var=var, anim=anim_color(var, color_on), b=color_on, nota=nota)
 
 
 def io(x, y, w, h, var, fmt, demo, size=14, modo="Salida", color="acento", bold=True):
@@ -97,13 +112,15 @@ def imagen_inicio():
     o = panel(8, 56, 180, 360, "TANQUE")
     o += [
         dict(t="pump", x=28, y=84, w=40, h=40, on=True, obj=("Círculo + Campo de texto", "Herramientas › Objetos básicos"),
-             var="DB_Linea.Tanque.Bomba_Marcha", anim="En el círculo: " + anim_color("DB_Linea.Tanque.Bomba_Marcha"),
+             var="DB_Linea.Tanque.Bomba_Marcha", b="marcha",
+             anim="En el círculo: " + anim_color("DB_Linea.Tanque.Bomba_Marcha", borde="cabecera"),
              nota="Círculo 40 × 40 con borde 2 px gris oscuro. Encima, un Campo de texto en (28, 92), 40 × 24, con el "
                   "símbolo ▲ (cópialo de aquí), Tahoma 18 negrita, blanco, centrado y fondo transparente. "
                   "Si en la pantalla sale un cuadrado, escribe una P"),
         dict(t="text", x=76, y=94, w=100, h=18, txt="Bomba", size=12, color="tenue", obj=OBJ_TEXT),
         dict(t="valve", x=36, y=138, w=24, h=24, on=True, obj=("Rectángulo + 2 Líneas", "Herramientas › Objetos básicos"),
-             var="VS_Valvula_Seguridad", anim="En el rectángulo: " + anim_color("VS_Valvula_Seguridad"),
+             var="VS_Valvula_Seguridad", b="marcha",
+             anim="En el rectángulo: " + anim_color("VS_Valvula_Seguridad", borde="cabecera"),
              nota="Rectángulo 24 × 24 con borde 1 px gris oscuro. Encima, dos Líneas gris oscuro de 2 px que forman una X: "
                   "de (36, 138) a (60, 162) y de (60, 138) a (36, 162)"),
         dict(t="text", x=76, y=142, w=104, h=18, txt="Válv. seguridad", size=12, color="tenue", obj=OBJ_TEXT),
@@ -127,11 +144,15 @@ def imagen_inicio():
     cintas = [("C1", 212, 150, "Cinta_C1_Entrada", True), ("C2", 366, 96, "Cinta_C2_Llenado", False),
               ("C3", 466, 96, "Cinta_C3_Taponado", True), ("C4", 566, 124, "Cinta_C4_Rechazo", False)]
     for nom, x, w, var, on in cintas:
-        o.append(dict(t="belt", x=x, y=176, w=w, h=18, on=on, var=var, obj=OBJ_RECT, anim=anim_color(var)))
+        o.append(dict(t="belt", x=x, y=176, w=w, h=18, on=on, var=var, obj=OBJ_RECT, anim=anim_color(var), b="marcha"))
         o.append(dict(t="text", x=x, y=198, w=w, h=14, txt=nom, size=11, color="tenue", align="c", obj=OBJ_TEXT))
     o += [
-        dict(t="belt", x=702, y=92, w=18, h=172, on=True, vertical=True, var="Cinta_C5_Hacia_05L / _2L", obj=OBJ_RECT,
-             anim="Receta B con Cinta_C5_Hacia_05L. Pon encima otro rectángulo igual con Receta B y Cinta_C5_Hacia_2L"),
+        dict(t="belt", x=702, y=92, w=18, h=172, on=True, vertical=True, var="Cinta_C5_Hacia_05L / Cinta_C5_Hacia_2L",
+             obj=("2 Rectángulos", "Herramientas › Objetos básicos"), b="marcha",
+             anim="Mitad de arriba: " + anim_color("Cinta_C5_Hacia_05L") + ". Mitad de abajo: lo mismo con Cinta_C5_Hacia_2L",
+             nota="La C5 se dibuja en dos mitades para que se vea hacia qué caja va: rectángulo de arriba (702, 92), "
+                  "18 × 84, hacia la caja de 0,5 L; rectángulo de abajo (702, 176), 18 × 88, hacia la caja de 2 L. "
+                  "Haz el de arriba, cópialo y en la copia cambia posición, alto y variable"),
         dict(t="text", x=682, y=270 - 20, w=16, h=14, txt="C5", size=11, color="tenue", obj=OBJ_TEXT),
         dict(t="text", x=212, y=154, w=80, h=16, txt="Entrada →", size=11, color="tenue", obj=OBJ_TEXT),
         # llenado
@@ -140,12 +161,12 @@ def imagen_inicio():
         dict(t="text", x=378, y=84, w=80, h=16, txt="LLENADO", size=11, bold=True, color="titulo", obj=OBJ_TEXT),
         io(432, 132, 64, 22, "DB_Linea.Llenado.Volumen_L", "9.99 L", "1.21 L", size=12),
         # TAP-01
-        dict(t="rect", x=496, y=126, w=36, h=30, fill="marcha", r=3, var="TAP01_Bajar", obj=OBJ_RECT,
+        dict(t="rect", x=496, y=126, w=36, h=30, fill="marcha", r=3, var="TAP01_Bajar", obj=OBJ_RECT, b="marcha",
              anim=anim_color("TAP01_Bajar")),
         dict(t="text", x=490, y=84, w=60, h=16, txt="TAP-01", size=11, bold=True, color="titulo", obj=OBJ_TEXT),
         # empujador
         dict(t="rect", x=612, y=148, w=28, h=24, fill="apagado", r=3, var="Empujador_Avanzar", obj=OBJ_RECT,
-             anim=anim_color("Empujador_Avanzar", "aviso")),
+             b="aviso", anim=anim_color("Empujador_Avanzar", "aviso")),
         dict(t="text", x=596, y=84, w=80, h=16, txt="RECHAZO", size=11, bold=True, color="titulo", obj=OBJ_TEXT),
         dict(t="rect", x=596, y=214, w=64, h=34, fill="blanco", stroke="borde", r=3, obj=OBJ_RECT, nota="Caja de malas"),
         dict(t="text", x=596, y=224, w=64, h=16, txt="MALAS", size=11, color="tenue", align="c", obj=OBJ_TEXT),
@@ -359,10 +380,14 @@ def svg_objeto(o):
         return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{col}" stroke="{C["cabecera"]}"/>'
                 f'<line x1="{x}" y1="{y}" x2="{x + w}" y2="{y + h}" stroke="{C["cabecera"]}" stroke-width="2"/>'
                 f'<line x1="{x + w}" y1="{y}" x2="{x}" y2="{y + h}" stroke="{C["cabecera"]}" stroke-width="2"/>')
+    if t == "belt" and o.get("vertical"):
+        # C5: mitad de arriba (hacia 0,5 L) en marcha en el boceto, mitad de abajo parada
+        return (svg_objeto(dict(o, h=84, vertical=False, rot=True))
+                + svg_objeto(dict(o, y=y + 84, h=h - 84, on=False, vertical=False, rot=True)))
     if t == "belt":
         col = C["marcha"] if o.get("on") else C["apagado"]
         out = f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="3" fill="{col}"/>'
-        if o.get("vertical"):
+        if o.get("rot"):
             for yy in range(int(y) + 8, int(y + h), 12):
                 out += f'<line x1="{x + 3}" y1="{yy}" x2="{x + w - 3}" y2="{yy}" stroke="#fff" opacity=".35"/>'
         else:
@@ -400,14 +425,45 @@ def svg_imagen(objs, ident, fondo=()):
 # ---------------------------------------------------------------------------
 # Página
 # ---------------------------------------------------------------------------
+def colores(o):
+    """Lista (qué, color) para la columna Colores. Color None = sin color (transparente)."""
+    t = o["t"]
+    if o.get("b"):                       # receta B: el color fijo es el de apagado
+        base = {"pump": [("Círculo, fondo:", "apagado"), ("Círculo, borde 2 px:", "cabecera"), ("Texto ▲:", "blanco")],
+                "valve": [("Rectángulo, fondo:", "apagado"), ("Borde y las 2 líneas:", "cabecera")]}.get(
+                    t, [("Fondo:", "apagado")] + ([("Borde:", "apagado")] if t in ("circle", "rect", "belt") else []))
+        return base + [("Animación, con 1:", o["b"])]
+    if t == "sym":
+        return [("Fondo:", "boton"), ("Texto:", "blanco"), ("Animación: tabla de estados", None)]
+    if t == "rect":
+        if o.get("demo_hide"):
+            return [("Fondo:", o["fill"]), ("Borde: sin línea", None)]
+        return [("Fondo:", o["fill"])] + ([("Borde 1 px:", o["stroke"])] if o.get("stroke") else [("Borde: sin línea", None)])
+    if t == "text":
+        return [("Texto:", o.get("color", "texto")), ("Fondo: transparente", None)]
+    if t == "button":
+        return [("Fondo:", o["fill"]), ("Texto:", o.get("color", "blanco"))]
+    if t == "io":
+        return [("Fondo:", "blanco"), ("Borde 1 px:", "borde"), ("Texto:", o["color"])]
+    if t == "bar":
+        return [("Barra:", o["fill"]), ("Fondo:", "blanco")] + ([("Borde: sin línea", None)] if o["h"] > o["w"] else [("Borde 1 px:", "borde")])
+    if t == "tank":
+        return [("Fondo: transparente", None), ("Borde 2 px:", "tenue")]
+    if t == "line":
+        return [("Línea 1 px:", o.get("color", "tenue"))]
+    if t == "bottle":
+        return [("Fondo:", "acento"), ("Borde:", "acento")]
+    if t == "time":
+        return [("Texto:", "blanco"), ("Fondo: transparente", None)]
+    return []
+
+
 def tabla_objetos(objs):
     filas = []
     for i, o in enumerate(objs, 1):
         nombre, donde = o["obj"]
-        col = ""
-        for k in ("fill", "color"):
-            if o.get(k) and o["t"] not in ("pump", "valve", "belt", "bottle"):
-                col += f'<span class="sw" style="background:{C[o[k]]}"></span>{k == "fill" and "fondo" or "texto"} {o[k]} '
+        col = "<br>".join(f'<span class="sw" style="background:{C[k]}"></span>{e(que)} {e(rgb(k))}'
+                          if k else e(que) for que, k in colores(o))
         detalle = []
         if o.get("txt"):
             detalle.append(f"Texto «{e(o['txt'].replace('|', ' '))}»" + (f" · {o['size']} px" if o.get("size") else "")
@@ -568,9 +624,13 @@ td.n{font:700 12px var(--f-mono);color:#6A1B9A}
     DB_Linea; las salidas, como <span class="mono">Cinta_C1_Entrada</span>, en Variables PLC.</li>
    <li><b>Tipo</b>: <b>Rango</b>.</li>
    <li>En la tabla de debajo añade dos filas:
-    <br>Fila 1 · Rango <b>0</b> · Color de fondo gris (207, 216, 220) · Color de primer plano el mismo · Parpadeo No.
-    <br>Fila 2 · Rango <b>1</b> · Color de fondo el de la tabla (verde 46, 160, 67; naranja 245, 158, 11; rojo 211, 47, 47…) ·
+    <br>Fila 1 · Rango <b>0</b> · Color de fondo gris claro (207, 216, 220) · Color de primer plano el mismo · Parpadeo No.
+    <br>Fila 2 · Rango <b>1</b> · Color de fondo el que diga la columna <b>Colores</b> de la tabla del objeto, en la línea
+    «Animación, con 1» (verde 46, 160, 67; naranja 245, 158, 11; rojo 211, 47, 47; azul agua 64, 156, 214) ·
     Color de primer plano el mismo · Parpadeo No.</li>
+   <li><b>Color de primer plano</b>: en un círculo o un rectángulo es el color del <b>borde</b>. Por eso se pone igual que el
+    fondo y el objeto se ve de un solo color. Solo en la bomba y la válvula va gris muy oscuro (38, 50, 56), para que se les
+    vea el contorno; la tabla lo dice en esos dos.</li>
    <li>Copia y pega el objeto: la animación se copia también. En la copia solo cambias la variable y, si hace falta, el color.</li>
   </ol>
 
